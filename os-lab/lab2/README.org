@@ -1,0 +1,772 @@
+#+TITLE: Operating System
+#+SUBTITLE: Lab 2
+#+AUTHOR: Seshal Jain
+#+OPTIONS: num:nil toc:nil ^:nil
+#+DATE: July 27, 2021
+#+LATEX_CLASS: assignment
+#+EXPORT_FILE_NAME: 191112436_2
+
+* Assignment A
+** Various Linux directories and their importance
+*** /bin
+The =/bin= directory has all the programs required by the system to work and the =/usr/bin= has programs specific to system users’ applications.
+*** /dev
+This directory contains devices in the form of files that are available to the system. You can read or write in these files/devices. For instance, =/dev/sda= represents hard drives, =/dev/sdb= represents removable drives etc.
+*** /etc
+This directory includes all the files that define the configuration of the system. It contains files such as =passwd= which stores information related to each user, =fstab= which has details regarding the mounted devices, =hosts= which contains details regarding the hostnames that the system recognizes, =init.d= which has information related to scripts that is used to start system-related services during boot.
+*** /home
+This is the user-specific directory where they can keep their personal files.
+*** /lib
+The =lib= folder is a library files directory which contains all helpful library files used by the system. In simple terms, these are helpful files which are used by an application or a command or a process for their proper execution. The commands in =/bin= or =/sbin= dynamic library files are located just in this directory. The kernel modules are also located here.
+*** /tmp
+This directory contains mostly files that are required temporarily. Many programs use this to create lock files and for temporary storage of data. On most systems, this directory is cleared out at boot or at shutdown by the local system.
+*** /usr
+This is one of the most important directories in the system as it contains all the user binaries, their documentation, libraries, header files, etc.
+** =tree= command
+Tree is a recursive directory listing program that produces a depth indented listing of files. With no arguments, tree lists the files in the current directory.  When directory arguments are given, tree lists all the files and/or directories found in the given directories each in turn.
+
+#+begin_src
+tree ~ -L 2 --prune -d
+#+end_src
+
+
+#+begin_example
+/
+|-- bin -> usr/bin
+|-- boot
+|-- dev
+|-- etc
+|-- home
+|-- lib -> usr/lib
+|-- lib64 -> usr/lib64
+|-- lost+found
+|-- media
+|-- mnt
+|-- opt
+|-- proc
+|-- root
+|-- run
+|-- sbin -> usr/sbin
+|-- srv
+|-- sys
+|-- tmp
+|-- usr
+`-- var
+
+20 directories
+#+end_example
+* Assignment B
+** Exploring Linux internals
+*** /lib/modules
+#+begin_src
+ls /lib/modules
+#+end_src
+
+#+begin_example
+5.11.12-300.fc34.x86_64
+5.11.16-300.fc34.x86_64
+5.12.15-300.fc34.x86_64
+#+end_example
+
+=/lib/modules= contains all the Linux kernel modules available to my Fedora 34 system
+*** /lib/modules/<release of Linux version>
+#+begin_src
+ls /lib/modules/5.12.15-300.fc34.x86_64
+#+end_src
+
+#+begin_example
+bls.conf
+build
+config
+extra
+kernel
+modules.alias
+modules.alias.bin
+modules.block
+modules.builtin
+modules.builtin.alias.bin
+modules.builtin.bin
+modules.builtin.modinfo
+modules.dep
+modules.dep.bin
+modules.devname
+modules.drm
+modules.modesetting
+modules.networking
+modules.order
+modules.softdep
+modules.symbols
+modules.symbols.bin
+source
+symvers.gz
+System.map
+updates
+vdso
+vmlinuz
+weak-updates
+#+end_example
+
+=/lib/modules/<kernel_number>= contains important modules related to the specific kernel version number
+*** /lib/modules/<release of Linux version >/kernel
+#+begin_src
+ls /lib/modules/5.12.15-300.fc34.x86_64/kernel
+#+end_src
+
+#+begin_example
+arch
+crypto
+drivers
+fs
+kernel
+lib
+mm
+net
+security
+sound
+virt
+#+end_example
+
+=/lib/modules<kernel_number>/kernel= contains all the Linux kernel files, including drivers for the kernel
+*** /lib/modules/<release of Linux version >/kernel/drivers
+#+begin_src
+ls /lib/modules/5.12.15-300.fc34.x86_64/kernel/drivers
+#+end_src
+
+#+begin_example
+accessibility
+acpi
+ata
+atm
+auxdisplay
+base
+bcma
+block
+bluetooth
+bus
+char
+clk
+cpufreq
+crypto
+cxl
+dax
+dca
+dma
+edac
+extcon
+firewire
+firmware
+fpga
+gnss
+gpio
+gpu
+hid
+hv
+hwmon
+hwtracing
+i2c
+iio
+infiniband
+input
+iommu
+leds
+md
+media
+memstick
+message
+mfd
+misc
+mmc
+mtd
+mux
+net
+nfc
+ntb
+nvdimm
+nvme
+nvmem
+parport
+pci
+pcmcia
+phy
+pinctrl
+platform
+power
+powercap
+pps
+ptp
+pwm
+regulator
+rpmsg
+rtc
+scsi
+soc
+soundwire
+spi
+ssb
+staging
+target
+thermal
+thunderbolt
+tty
+uio
+usb
+vdpa
+vfio
+vhost
+video
+virt
+virtio
+w1
+watchdog
+xen
+#+end_example
+
+=/lib/modules/<kernel_number>/kernel/drivers= contains all the Linux kernel drivers for devices like =tty=, =usb=, =gpio= etc, including drivers for the kernel
+*** /usr/src/linux-header< release of Linux version >/drivers
+On Fedora 34 the Linux header files reside in =/usr/src/kernels/<kernel_number>=
+#+begin_src
+ls /usr/src/kernels//drivers
+#+end_src
+
+#+begin_example
+accessibility
+acpi
+amba
+android
+ata
+atm
+auxdisplay
+base
+bcma
+block
+bluetooth
+bus
+cdrom
+char
+clk
+clocksource
+connector
+counter
+cpufreq
+cpuidle
+crypto
+cxl
+dax
+dca
+devfreq
+dio
+dma
+dma-buf
+edac
+eisa
+extcon
+firewire
+firmware
+fpga
+fsi
+gnss
+gpio
+gpu
+greybus
+hid
+hsi
+hv
+hwmon
+hwspinlock
+hwtracing
+i2c
+i3c
+ide
+idle
+iio
+infiniband
+input
+interconnect
+iommu
+ipack
+irqchip
+isdn
+Kconfig
+leds
+lightnvm
+macintosh
+mailbox
+Makefile
+mcb
+md
+media
+memory
+memstick
+message
+mfd
+misc
+mmc
+most
+mtd
+mux
+net
+nfc
+ntb
+nubus
+nvdimm
+nvme
+nvmem
+of
+opp
+parisc
+parport
+pci
+pcmcia
+perf
+phy
+pinctrl
+platform
+pnp
+power
+powercap
+pps
+ps3
+ptp
+pwm
+rapidio
+ras
+regulator
+remoteproc
+reset
+rpmsg
+rtc
+s390
+sbus
+scsi
+sh
+siox
+slimbus
+soc
+soundwire
+spi
+spmi
+ssb
+staging
+target
+tc
+tee
+thermal
+thunderbolt
+tty
+uio
+usb
+vdpa
+vfio
+vhost
+video
+virt
+virtio
+visorbus
+vlynq
+vme
+w1
+watchdog
+xen
+zorro
+
+#+end_example
+
+This directory contains the module drivers installed for the user. The drivers in use are stored in =/lib/modules/<kernel_number>/drivers=
+*** /usr/src/linux/Documentation/
+This directory does not exist on my system. However, it usually contains the Documentation for various components of Linux.
+** What are Linux Modules?
+Linux modules are lumps of code that can be dynamically linked into the kernel at any point after the system has booted. They can be unlinked from the kernel and removed when they are no longer needed. Mostly Linux kernel modules are device drivers, pseudo-device drivers such as network drivers, or file-systems.
+** What is .ko file?
+=.ko= file is an object file linked with some kernel automatically generated data structures that are needed by the kernel.
+** Some module commands
+*** modprobe
+=modprobe= can be used to load or remove modeles from the kernel
+
+=modprobe <module>= installs a module
+
+=modprobe -r <module>= removes a module
+*** lsmod
+=lsmod= show the status of Linux kernel modules
+
+#+begin_src
+lsmod
+#+end_src
+
+#+begin_example
+Module                  Size  Used by
+rfcomm                 90112  4
+snd_seq_dummy          16384  0
+snd_hrtimer            16384  1
+xt_CHECKSUM            16384  1
+xt_MASQUERADE          20480  3
+xt_conntrack           16384  1
+ipt_REJECT             16384  2
+nf_nat_tftp            16384  0
+nf_conntrack_tftp      20480  3 nf_nat_tftp
+bridge                303104  0
+stp                    16384  1 bridge
+llc                    16384  2 bridge,stp
+ccm                    20480  3
+nft_objref             16384  2
+nf_conntrack_netbios_ns    16384  1
+nf_conntrack_broadcast    16384  1 nf_conntrack_netbios_ns
+nft_fib_inet           16384  1
+nft_fib_ipv4           16384  1 nft_fib_inet
+nft_fib_ipv6           16384  1 nft_fib_inet
+nft_fib                16384  3 nft_fib_ipv6,nft_fib_ipv4,nft_fib_inet
+nft_reject_inet        16384  5
+nf_reject_ipv4         16384  2 nft_reject_inet,ipt_REJECT
+nf_reject_ipv6         20480  1 nft_reject_inet
+nft_reject             16384  1 nft_reject_inet
+nft_ct                 20480  24
+nft_chain_nat          16384  4
+ip6table_nat           16384  1
+ip6table_mangle        16384  1
+ip6table_raw           16384  0
+ip6table_security      16384  0
+iptable_nat            16384  1
+nf_nat                 49152  5 ip6table_nat,nf_nat_tftp,nft_chain_nat,iptable_nat,xt_MASQUERADE
+nf_conntrack          163840  8 xt_conntrack,nf_nat,nf_conntrack_tftp,nft_ct,nf_conntrack_netbios_ns,nf_nat_tftp,nf_conntrack_broadcast,xt_MASQUERADE
+nf_defrag_ipv6         24576  1 nf_conntrack
+nf_defrag_ipv4         16384  1 nf_conntrack
+iptable_mangle         16384  1
+iptable_raw            16384  0
+iptable_security       16384  0
+ip_set                 57344  0
+nf_tables             245760  386 nft_ct,nft_reject_inet,nft_fib_ipv6,nft_objref,nft_fib_ipv4,nft_chain_nat,nft_reject,nft_fib,nft_fib_inet
+nfnetlink              16384  3 nf_tables,ip_set
+ip6table_filter        16384  1
+ip6_tables             32768  5 ip6table_filter,ip6table_raw,ip6table_nat,ip6table_mangle,ip6table_security
+iptable_filter         16384  1
+cmac                   16384  2
+bnep                   28672  2
+sunrpc                626688  1
+snd_hda_codec_realtek   151552  1
+mei_hdcp               24576  0
+mei_wdt                16384  0
+at24                   24576  0
+snd_hda_codec_generic    98304  1 snd_hda_codec_realtek
+iTCO_wdt               16384  0
+x86_pkg_temp_thermal    20480  0
+snd_hda_codec_hdmi     73728  1
+intel_powerclamp       20480  0
+coretemp               20480  0
+ppdev                  24576  0
+intel_rapl_msr         20480  0
+intel_pmc_bxt          16384  1 iTCO_wdt
+snd_hda_intel          57344  7
+iTCO_vendor_support    16384  1 iTCO_wdt
+kvm_intel             335872  0
+iwlmvm                483328  0
+btusb                  65536  0
+snd_intel_dspcfg       28672  1 snd_hda_intel
+uvcvideo              118784  0
+kvm                   987136  1 kvm_intel
+snd_intel_sdw_acpi     20480  1 snd_intel_dspcfg
+mac80211             1134592  1 iwlmvm
+btrtl                  28672  1 btusb
+snd_hda_codec         172032  4 snd_hda_codec_generic,snd_hda_codec_hdmi,snd_hda_intel,snd_hda_codec_realtek
+btbcm                  16384  1 btusb
+dell_laptop            28672  0
+ledtrig_audio          16384  2 snd_hda_codec_generic,dell_laptop
+dell_smm_hwmon         24576  0
+btintel                32768  1 btusb
+videobuf2_vmalloc      20480  1 uvcvideo
+libarc4                16384  1 mac80211
+videobuf2_memops       20480  1 videobuf2_vmalloc
+bluetooth             671744  36 btrtl,btintel,btbcm,bnep,btusb,rfcomm
+irqbypass              16384  1 kvm
+videobuf2_v4l2         36864  1 uvcvideo
+rapl                   20480  0
+snd_hda_core          110592  5 snd_hda_codec_generic,snd_hda_codec_hdmi,snd_hda_intel,snd_hda_codec,snd_hda_codec_realtek
+videobuf2_common       65536  4 videobuf2_vmalloc,videobuf2_v4l2,uvcvideo,videobuf2_memops
+snd_hwdep              16384  1 snd_hda_codec
+iwlwifi               339968  1 iwlmvm
+intel_cstate           20480  0
+snd_seq                86016  7 snd_seq_dummy
+intel_uncore          176128  0
+snd_seq_device         16384  1 snd_seq
+videodev              278528  3 videobuf2_v4l2,uvcvideo,videobuf2_common
+snd_pcm               135168  6 snd_hda_codec_hdmi,snd_hda_intel,snd_hda_codec,snd_hda_core
+dell_wmi               20480  0
+dell_smbios            32768  2 dell_wmi,dell_laptop
+wmi_bmof               16384  0
+dcdbas                 20480  1 dell_smbios
+processor_thermal_device    20480  0
+processor_thermal_rfim    16384  1 processor_thermal_device
+processor_thermal_mbox    16384  1 processor_thermal_device
+sparse_keymap          16384  1 dell_wmi
+pcspkr                 16384  0
+i2c_i801               32768  0
+dell_wmi_descriptor    20480  2 dell_wmi,dell_smbios
+ecdh_generic           16384  1 bluetooth
+cfg80211             1003520  3 iwlmvm,iwlwifi,mac80211
+i2c_smbus              20480  1 i2c_i801
+ecc                    36864  1 ecdh_generic
+mc                     65536  4 videodev,videobuf2_v4l2,uvcvideo,videobuf2_common
+processor_thermal_rapl    20480  1 processor_thermal_device
+joydev                 28672  0
+snd_timer              49152  3 snd_seq,snd_hrtimer,snd_pcm
+intel_rapl_common      28672  2 intel_rapl_msr,processor_thermal_rapl
+mei_me                 45056  2
+mei                   151552  5 mei_wdt,mei_hdcp,mei_me
+snd                   110592  24 snd_hda_codec_generic,snd_seq,snd_seq_device,snd_hda_codec_hdmi,snd_hwdep,snd_hda_intel,snd_hda_codec,snd_hda_codec_realtek,snd_timer,snd_pcm
+lpc_ich                28672  0
+intel_soc_dts_iosf     20480  1 processor_thermal_device
+soundcore              16384  1 snd
+parport_pc             40960  0
+int3403_thermal        20480  0
+parport                69632  2 parport_pc,ppdev
+dell_rbtn              20480  0
+int3402_thermal        16384  0
+rfkill                 28672  10 bluetooth,dell_laptop,dell_rbtn,cfg80211
+int340x_thermal_zone    20480  3 int3403_thermal,int3402_thermal,processor_thermal_device
+int3400_thermal        20480  0
+acpi_thermal_rel       16384  1 int3400_thermal
+acpi_pad              184320  0
+zram                   24576  2
+ip_tables              28672  5 iptable_filter,iptable_security,iptable_raw,iptable_nat,iptable_mangle
+i915                 2768896  26
+crct10dif_pclmul       16384  1
+crc32_pclmul           16384  0
+crc32c_intel           24576  6
+i2c_algo_bit           16384  1 i915
+sdhci_pci              69632  0
+drm_kms_helper        290816  1 i915
+e1000e                303104  0
+cqhci                  32768  1 sdhci_pci
+sdhci                  77824  1 sdhci_pci
+cec                    61440  2 drm_kms_helper,i915
+drm                   626688  9 drm_kms_helper,i915
+ghash_clmulni_intel    16384  0
+serio_raw              20480  0
+mmc_core              184320  3 sdhci,cqhci,sdhci_pci
+wmi                    36864  4 dell_wmi,wmi_bmof,dell_smbios,dell_wmi_descriptor
+video                  53248  3 dell_wmi,dell_laptop,i915
+fuse                  159744  3
+#+end_example
+
+*** cat /proc/cpuinfo
+This file contains information about the CPU of the current system
+#+begin_src
+cat /proc/cpuinfo
+#+end_src
+
+#+begin_example
+processor	: 0
+vendor_id	: GenuineIntel
+cpu family	: 6
+model		: 61
+model name	: Intel(R) Core(TM) i5-5300U CPU @ 2.30GHz
+stepping	: 4
+microcode	: 0x2f
+cpu MHz		: 500.000
+cache size	: 3072 KB
+physical id	: 0
+siblings	: 4
+core id		: 0
+cpu cores	: 2
+apicid		: 0
+initial apicid	: 0
+fpu		: yes
+fpu_exception	: yes
+cpuid level	: 20
+wp		: yes
+flags		: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush dts acpi mmx fxsr sse sse2 ss ht tm pbe syscall nx pdpe1gb rdtscp lm constant_tsc arch_perfmon pebs bts rep_good nopl xtopology nonstop_tsc cpuid aperfmperf pni pclmulqdq dtes64 monitor ds_cpl vmx smx est tm2 ssse3 sdbg fma cx16 xtpr pdcm pcid sse4_1 sse4_2 x2apic movbe popcnt tsc_deadline_timer aes xsave avx f16c rdrand lahf_lm abm 3dnowprefetch cpuid_fault epb invpcid_single pti ssbd ibrs ibpb stibp tpr_shadow vnmi flexpriority ept vpid ept_ad fsgsbase tsc_adjust bmi1 hle avx2 smep bmi2 erms invpcid rtm rdseed adx smap intel_pt xsaveopt dtherm ida arat pln pts md_clear flush_l1d
+vmx flags	: vnmi preemption_timer invvpid ept_x_only ept_ad ept_1gb flexpriority tsc_offset vtpr mtf vapic ept vpid unrestricted_guest ple shadow_vmcs
+bugs		: cpu_meltdown spectre_v1 spectre_v2 spec_store_bypass l1tf mds swapgs taa itlb_multihit srbds
+bogomips	: 4589.27
+clflush size	: 64
+cache_alignment	: 64
+address sizes	: 39 bits physical, 48 bits virtual
+power management:
+
+processor	: 1
+vendor_id	: GenuineIntel
+cpu family	: 6
+model		: 61
+model name	: Intel(R) Core(TM) i5-5300U CPU @ 2.30GHz
+stepping	: 4
+microcode	: 0x2f
+cpu MHz		: 500.000
+cache size	: 3072 KB
+physical id	: 0
+siblings	: 4
+core id		: 1
+cpu cores	: 2
+apicid		: 2
+initial apicid	: 2
+fpu		: yes
+fpu_exception	: yes
+cpuid level	: 20
+wp		: yes
+flags		: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush dts acpi mmx fxsr sse sse2 ss ht tm pbe syscall nx pdpe1gb rdtscp lm constant_tsc arch_perfmon pebs bts rep_good nopl xtopology nonstop_tsc cpuid aperfmperf pni pclmulqdq dtes64 monitor ds_cpl vmx smx est tm2 ssse3 sdbg fma cx16 xtpr pdcm pcid sse4_1 sse4_2 x2apic movbe popcnt tsc_deadline_timer aes xsave avx f16c rdrand lahf_lm abm 3dnowprefetch cpuid_fault epb invpcid_single pti ssbd ibrs ibpb stibp tpr_shadow vnmi flexpriority ept vpid ept_ad fsgsbase tsc_adjust bmi1 hle avx2 smep bmi2 erms invpcid rtm rdseed adx smap intel_pt xsaveopt dtherm ida arat pln pts md_clear flush_l1d
+vmx flags	: vnmi preemption_timer invvpid ept_x_only ept_ad ept_1gb flexpriority tsc_offset vtpr mtf vapic ept vpid unrestricted_guest ple shadow_vmcs
+bugs		: cpu_meltdown spectre_v1 spectre_v2 spec_store_bypass l1tf mds swapgs taa itlb_multihit srbds
+bogomips	: 4589.27
+clflush size	: 64
+cache_alignment	: 64
+address sizes	: 39 bits physical, 48 bits virtual
+power management:
+
+processor	: 2
+vendor_id	: GenuineIntel
+cpu family	: 6
+model		: 61
+model name	: Intel(R) Core(TM) i5-5300U CPU @ 2.30GHz
+stepping	: 4
+microcode	: 0x2f
+cpu MHz		: 2900.000
+cache size	: 3072 KB
+physical id	: 0
+siblings	: 4
+core id		: 0
+cpu cores	: 2
+apicid		: 1
+initial apicid	: 1
+fpu		: yes
+fpu_exception	: yes
+cpuid level	: 20
+wp		: yes
+flags		: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush dts acpi mmx fxsr sse sse2 ss ht tm pbe syscall nx pdpe1gb rdtscp lm constant_tsc arch_perfmon pebs bts rep_good nopl xtopology nonstop_tsc cpuid aperfmperf pni pclmulqdq dtes64 monitor ds_cpl vmx smx est tm2 ssse3 sdbg fma cx16 xtpr pdcm pcid sse4_1 sse4_2 x2apic movbe popcnt tsc_deadline_timer aes xsave avx f16c rdrand lahf_lm abm 3dnowprefetch cpuid_fault epb invpcid_single pti ssbd ibrs ibpb stibp tpr_shadow vnmi flexpriority ept vpid ept_ad fsgsbase tsc_adjust bmi1 hle avx2 smep bmi2 erms invpcid rtm rdseed adx smap intel_pt xsaveopt dtherm ida arat pln pts md_clear flush_l1d
+vmx flags	: vnmi preemption_timer invvpid ept_x_only ept_ad ept_1gb flexpriority tsc_offset vtpr mtf vapic ept vpid unrestricted_guest ple shadow_vmcs
+bugs		: cpu_meltdown spectre_v1 spectre_v2 spec_store_bypass l1tf mds swapgs taa itlb_multihit srbds
+bogomips	: 4589.27
+clflush size	: 64
+cache_alignment	: 64
+address sizes	: 39 bits physical, 48 bits virtual
+power management:
+
+processor	: 3
+vendor_id	: GenuineIntel
+cpu family	: 6
+model		: 61
+model name	: Intel(R) Core(TM) i5-5300U CPU @ 2.30GHz
+stepping	: 4
+microcode	: 0x2f
+cpu MHz		: 2305.740
+cache size	: 3072 KB
+physical id	: 0
+siblings	: 4
+core id		: 1
+cpu cores	: 2
+apicid		: 3
+initial apicid	: 3
+fpu		: yes
+fpu_exception	: yes
+cpuid level	: 20
+wp		: yes
+flags		: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush dts acpi mmx fxsr sse sse2 ss ht tm pbe syscall nx pdpe1gb rdtscp lm constant_tsc arch_perfmon pebs bts rep_good nopl xtopology nonstop_tsc cpuid aperfmperf pni pclmulqdq dtes64 monitor ds_cpl vmx smx est tm2 ssse3 sdbg fma cx16 xtpr pdcm pcid sse4_1 sse4_2 x2apic movbe popcnt tsc_deadline_timer aes xsave avx f16c rdrand lahf_lm abm 3dnowprefetch cpuid_fault epb invpcid_single pti ssbd ibrs ibpb stibp tpr_shadow vnmi flexpriority ept vpid ept_ad fsgsbase tsc_adjust bmi1 hle avx2 smep bmi2 erms invpcid rtm rdseed adx smap intel_pt xsaveopt dtherm ida arat pln pts md_clear flush_l1d
+vmx flags	: vnmi preemption_timer invvpid ept_x_only ept_ad ept_1gb flexpriority tsc_offset vtpr mtf vapic ept vpid unrestricted_guest ple shadow_vmcs
+bugs		: cpu_meltdown spectre_v1 spectre_v2 spec_store_bypass l1tf mds swapgs taa itlb_multihit srbds
+bogomips	: 4589.27
+clflush size	: 64
+cache_alignment	: 64
+address sizes	: 39 bits physical, 48 bits virtual
+power management:
+
+
+#+end_example
+*** cat /proc/meminfo
+This file contains information about the memory utilization of the current system
+#+begin_src
+cat /proc/meminfo
+#+end_src
+
+#+begin_example
+MemTotal:        8027748 kB
+MemFree:          760184 kB
+MemAvailable:    3960976 kB
+Buffers:          473232 kB
+Cached:          3316720 kB
+SwapCached:           72 kB
+Active:          1933356 kB
+Inactive:        4744492 kB
+Active(anon):      65832 kB
+Inactive(anon):  3315280 kB
+Active(file):    1867524 kB
+Inactive(file):  1429212 kB
+Unevictable:      119368 kB
+Mlocked:            4672 kB
+SwapTotal:       8027132 kB
+SwapFree:        8015612 kB
+Dirty:                96 kB
+Writeback:             0 kB
+AnonPages:       3007216 kB
+Mapped:           941660 kB
+Shmem:            501620 kB
+KReclaimable:     207668 kB
+Slab:             314468 kB
+SReclaimable:     207668 kB
+SUnreclaim:       106800 kB
+KernelStack:       12688 kB
+PageTables:        41976 kB
+NFS_Unstable:          0 kB
+Bounce:                0 kB
+WritebackTmp:          0 kB
+CommitLimit:    12041004 kB
+Committed_AS:    9715780 kB
+VmallocTotal:   34359738367 kB
+VmallocUsed:       68536 kB
+VmallocChunk:          0 kB
+Percpu:             4608 kB
+HardwareCorrupted:     0 kB
+AnonHugePages:         0 kB
+ShmemHugePages:        0 kB
+ShmemPmdMapped:        0 kB
+FileHugePages:         0 kB
+FilePmdMapped:         0 kB
+CmaTotal:              0 kB
+CmaFree:               0 kB
+HugePages_Total:       0
+HugePages_Free:        0
+HugePages_Rsvd:        0
+HugePages_Surp:        0
+Hugepagesize:       2048 kB
+Hugetlb:               0 kB
+DirectMap4k:      369600 kB
+DirectMap2M:     7905280 kB
+DirectMap1G:     1048576 kB
+#+end_example
+
+*** cat /proc/partitions
+This file contains information about the harddisk partitions of the current system
+#+begin_src
+cat /proc/partitions
+#+end_src
+
+#+begin_example
+major minor  #blocks  name
+
+   8        0  250059096 sda
+   8        1    1048576 sda1
+   8        2  165118976 sda2
+   8        3   83886080 sda3
+ 252        0    8027136 zram0
+#+end_example
+
+*** lspci
+This commands lists all PCI (Peripheral Component Interconnect) devices on the current system
+#+begin_src
+lspci
+#+end_src
+
+#+begin_example
+00:00.0 Host bridge: Intel Corporation Broadwell-U Host Bridge -OPI (rev 09)
+00:02.0 VGA compatible controller: Intel Corporation HD Graphics 5500 (rev 09)
+00:03.0 Audio device: Intel Corporation Broadwell-U Audio Controller (rev 09)
+00:04.0 Signal processing controller: Intel Corporation Broadwell-U Processor Thermal Subsystem (rev 09)
+00:14.0 USB controller: Intel Corporation Wildcat Point-LP USB xHCI Controller (rev 03)
+00:16.0 Communication controller: Intel Corporation Wildcat Point-LP MEI Controller #1 (rev 03)
+00:19.0 Ethernet controller: Intel Corporation Ethernet Connection (3) I218-LM (rev 03)
+00:1b.0 Audio device: Intel Corporation Wildcat Point-LP High Definition Audio Controller (rev 03)
+00:1c.0 PCI bridge: Intel Corporation Wildcat Point-LP PCI Express Root Port #1 (rev e3)
+00:1c.3 PCI bridge: Intel Corporation Wildcat Point-LP PCI Express Root Port #4 (rev e3)
+00:1d.0 USB controller: Intel Corporation Wildcat Point-LP USB EHCI Controller (rev 03)
+00:1f.0 ISA bridge: Intel Corporation Wildcat Point-LP LPC Controller (rev 03)
+00:1f.2 SATA controller: Intel Corporation Wildcat Point-LP SATA Controller [AHCI Mode] (rev 03)
+00:1f.3 SMBus: Intel Corporation Wildcat Point-LP SMBus Controller (rev 03)
+01:00.0 SD Host controller: O2 Micro, Inc. SD/MMC Card Reader Controller (rev 01)
+02:00.0 Network controller: Intel Corporation Wireless 7265 (rev 59)
+
+#+end_example
