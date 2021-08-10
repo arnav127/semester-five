@@ -1,0 +1,78 @@
+#+TITLE: Operating System
+#+SUBTITLE: Lab 3
+#+AUTHOR: Seshal Jain
+#+OPTIONS: num:nil toc:nil ^:nil
+#+DATE: August 03, 2021
+#+LATEX_CLASS: assignment
+#+EXPORT_FILE_NAME: 191112436_3
+
+** Exploring Vim
+Vim is a terminal based text only editor which uses modal editing. It is pre-installed on most Linux distributions, and supports high level of configuration and plugins.
+
+*Modal editing* \\
+Modal editing is a concept which separates various editing modes. It helps with separation of concerns, and can enhance productivity significantly.
+**** Normal mode
+=NORMAL= is where we spend most of the time while using Vim.
+
+In normal mode, there are multiple ways to move around an open file. In addition to using the cursor keys to move around, we can use =h= (left), =j= (down), =k= (up), and =l= (right) to move as well.
+
+We can also make changes to single characters in normal mode. To replace a single character, we move the cursor over it and press =r=, and then the character we want to replace it with. Similarly, we can delete single characters by moving the cursor over it and pressing =x=.
+
+Pressing =u= in normal mode performs an undo. This undoes changes up to the last time we were in normal mode. =C-r= performs a redo instead.
+
+**** Insert Mode
+This is the second most used mode. Once in insert mode, typing inserts characters just like a regular text editor. We can enter it by using an insert command from normal mode.
+
+Insert commands include:
+
+- =i= for 'insert', this immediately switches Vim to insert mode
+- =a= for 'append', this moves the cursor after the current character and enters insert mode
+- =o= inserts a new line below the current line and enters insert mode on the new line
+
+To leave insert mode and return to normal mode, we can press =Esc= or =C-[=
+
+**** Visual Mode
+Visual mode is used to make selections of text, similar to how clicking and dragging with a mouse behaves. Selecting text allows commands to apply only to the selection, such as copying, deleting, replacing, and so on.
+
+It has the following options:
+- visual: Entered by pressing =v=
+- block-visual: For selecting any rectangular region. Enter by pressing =C-v=
+- linewise-visual: For selecting full lines. Enter by pressing =S-v=
+
+**** Command Mode
+Command mode has a wide variety of commands and can do things that normal mode can’t do as easily. To enter command mode we type ':' from normal mode and then type the command which should appear at the bottom of the window. For example, to do a global find and replace we can type =:%s/foo/bar/g= to replace all 'foo' with 'bar'
+** =chmod=
+This command is used for changing the access permissions of a file or directory.
+
+It has to formats: /relative/ and /absolute/
+
+*Relative*: we can change some permissions of the file, leaving the rest unchanged
+
+#+begin_src
+$ chmod +x script.bash
+#+end_src
+
+This will add the executable permissions to script.sh \\
+We can =r= for read, =w= for write and =x= for execute
+
+*Absolute*: we specify all permissions explicitly via writing their specific notations
+We use 4 for read, 2 for write and 1 for execute.
+
+The only caveat is that we need to specify these permissions explicitly for user, group and others
+#+begin_src
+$ chmod 600 script.bash
+#+end_src
+This ensures user / owner can read, can write but cannot execute.
+** =chown=
+This command is used to change user and group ownership of files and directories.
+
+Example:
+- Change the owner user of a file/directory:
+#+begin_src
+$ chown <user> path/to/file_or_directory
+#+end_src
+
+- Change the owner user and group of a file/directory:
+#+begin_src
+$ chown user:group path/to/file_or_directory
+#+end_src
