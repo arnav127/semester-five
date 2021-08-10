@@ -1,0 +1,153 @@
+#+TITLE: Operating System
+#+SUBTITLE: Lab 4
+#+AUTHOR: Seshal Jain
+#+OPTIONS: num:nil toc:nil ^:nil
+#+DATE: August 10, 2021
+#+LATEX_CLASS: assignment
+#+EXPORT_FILE_NAME: 191112436_4
+* System calls provided by C in Linux
+** =open()=
+Syntax:
+#+begin_src c
+int open(const char *pathname, int flags);
+#+end_src
+
+The open() system call opens the file specified by pathname. If the specified file does not exist, it may optionally be created by open().
+The return value of open() is a file descriptor, a small, nonnegative integer that is used in subsequent system calls to refer to the open file. The file descriptor returned by a successful call will be the lowest-numbered file descriptor not currently open for the process.
+** =read()=
+#+begin_src c
+int read(int handle, void *buffer, int nbyte);
+#+end_src
+
+The read() function attempts to read =n= bytes from the file associated with =handle=, and places the characters read into =buffer=. If the file is opened using =O_TEXT=, it removes carriage returns and detects the end of the file. The function returns the number of bytes read. On end-of-file, 0 is returned, on error it returns -1, setting =errno= to indicate the type of error that occurred.
+** =write()=
+#+begin_src c
+int write(int handle, void *buffer, int nbyte);
+#+end_src
+
+The write() function attempts to write =n= bytes from buffer to the file associated with handle. On text files, it expands each =LF= (line feed) to a =CR/LF= (carriage-return line feed). The function returns the number of bytes written to the file. A return value of -1 indicates an error, with =errno= set appropriately.
+* C libraries for system calls
+#+begin_src c
+#include <sys/types.h>
+#include <unistd.h>
+#include <fcntl.h>
+#+end_src
+
+** *sys/types.h*
+
+ This libraries defines several datatypes via typedefs. It is a part of the POSIX standard.
+ Some of the types provided by this library are:
+
+- blksize_t       Used for block sizes.
+- clock_t         Used for system times in clock ticks
+- dev_t           Used for device IDs.
+- gid_t           Used for group IDs.
+- mode_t          Used for some file attributes.
+- off_t           Used for file sizes.
+- pid_t           Used for process IDs and process group IDs.
+- pthread_t       Used to identify a thread.
+- size_t          Used for sizes of objects.
+- time_t          Used for time in seconds.
+- uid_t           Used for user IDs.
+
+*** *unistd.h*
+
+ The <unistd.h> header defines miscellaneous symbolic constants and types, and declares miscellaneous functions. The actual values of the constants are unspecified in most cases. It declares many POSIX standard constants. \\
+Some of the constants defined are:
+
+-  _POSIX_SHELL
+-  _POSIX_THREAD_CPUTIME
+-  _CS_PATH
+-  F_OK
+-  F_TEST
+
+It also includes several function prototypes including:
+
+- int          chown(const char *, uid_t, gid_t);
+- int          close(int);
+- pid_t        fork(void);
+- uid_t        getuid(void);
+- int          link(const char *, const char *);
+- int          nice(int);
+- int          pause(void);
+- ssize_t      read(int, void *, size_t);
+- unsigned     sleep(unsigned);
+- char        *ttyname(int);
+- ssize_t      write(int, const void *, size_t);
+*** *fcntl.h*
+
+The <fcntl.h> header defines the following symbolic constants for the cmd argument used by fcntl(). The values are unique and suitable for use in #if preprocessing directives.
+
+It defines the following:
+
+- F_GETFD     Get file descriptor flags.
+- F_SETFL     Set file status flags.
+- F_RDLCK     Shared or read lock.
+- O_CREAT     Create file if it does not exist.
+- O_APPEND    Set append mode.
+- O_RDONLY    Open for reading only.
+- int  creat(const char *, mode_t);
+- int  open(const char *, int, ...);
+* C program to copy bytes
+#+begin_src c :tangle l4p1.c
+#include <stdio.h>
+#include <stdlib.h>
+#include <fcntl.h>
+#include <unistd.h>
+
+void copyUtil(char srcFile[], char destFile[], int byteCnt){
+    int srcFileDesc = open(srcFile, O_RDONLY);
+    if (srcFileDesc == -1){
+        perror("Error: ");
+        exit(1);
+    }
+
+    int destFileDesc = open(destFile, O_WRONLY|O_CREAT|O_APPEND, S_IRWXU);
+    if (destFileDesc == -1){
+        perror("Error: ");
+        exit(1);
+    }
+
+    if (byteCnt<0){
+        fprintf(stderr, "Error: byte count should not be less than 0. Found %d", byteCnt);
+        exit(1);
+    }
+
+    char srcBuf[byteCnt];
+    int readBuf = read(srcFileDesc, srcBuf, byteCnt);
+    if (readBuf<0){
+        perror("Error: ");
+        exit(1);
+    }
+
+    int writtenBytes = write(destFileDesc, srcBuf, byteCnt);
+    if (writtenBytes < 0) {
+      perror("Error:");
+      exit(1);
+    }
+
+    printf("Successfuly copied %d bytes from %s to %s\n", writtenBytes,
+           srcFile, destFile);
+}
+
+int main() {
+  printf("This program copies contents of one file to another file.\n");
+
+  printf("Enter source filename: ");
+  char srcFile[100];
+  scanf("%s", srcFile);
+
+  printf("Enter destination filename: ");
+  char destFile[100];
+  scanf("%s", destFile);
+
+  printf("Enter number of bytes to copy: ");
+  int byteCnt;
+  scanf("%d", &byteCnt);
+
+  copyUtil(srcFile, destFile, byteCnt);
+  return 0;
+}
+#+end_src
+** Output
+[[./images/cpUtil.png]]
