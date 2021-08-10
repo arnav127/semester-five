@@ -1,0 +1,41 @@
+#+TITLE: Cryptography
+#+SUBTITLE: Tutorial 1
+#+AUTHOR: Seshal Jain
+#+OPTIONS: num:nil toc:nil
+#+DATE: July 28, 2021
+#+LATEX_CLASS: assignment
+#+EXPORT_FILE_NAME: 191112436
+
+* A Tutorial on Linear and Differential Cryptanalysis
+The paper discusses various cryptanalysis techniques on a basic *Substitution-Permutation Network* (SPN) cipher.
+** Linear Cryptanalysis
+Linear cryptanalysis takes advantage of high probability of occurance of plaintext bits, cipher bits and subkey bits. It assumes that the attacker has information on a set of plaintexts and corresponding ciphertexts, but not the direct mappings between them. \\
+Since the cipher essentially works using mod-2 bitwise =XOR= operations, the attack finds expressions having high /or/ low probability of occurance. The probability of an =XOR= computation helps the attacker break the cipher — the further this probability deviates from 1, the better chances are for the attacker to crack it. This deviation is called the linear probability bias, =p_L=.
+
+To construct highly linear expressions, we concatenate linear approximations of the S-boxes together to cancel out the data bits from within the cipher. We are left with a linear expression having a /large bias/ with only plaintext and last round input bits. To move ahead with the construction, we use the Piling-Up Lemma assuming all n random binary variables are independent.
+
+The process followed involves partially decrypting the last round of the cipher. For all possible values of the target partial subkey, the corresponding ciphertext bits are XORed with the bits of the target partial subkey and the result is run backwards through the corresponding S-boxes. Since the attacker knows same of the ciphertext bits, a count is kept for each value of the target partial subkey. The target partial subkey value which has the count which differs the greatest from half the number of plaintext/ciphertext samples is assumed to represent the correct values of the target partial subkey bits.
+
+** Differential Cryptanalysis
+Differential cryptanalysis exploits the high probability of certain occurrences of plaintext differences and differences into the last round of the cipher.
+Difference refers to the bit-wise XOR of two inputs in to the system along with their corresponding outputs.
+Ideally, the probability for a random output difference given a particular input differences is =1/2^n=. A very high probability is preferred for this method. Again, he attacker has some inputs and corresponding outputs as a sample to derive the key. But, instead of one input, they select a pair of inputs to get a particular difference for which particular output difference occurs with high probability.
+
+We analyze the properties of individual S-boxes and differences, then concatenate appropriate pairs of S-boxes which makes it highly likely to recover a subset of the subkey bits from the last round, and then attack the cipher.
+
+After =R - 1= rounds, differential characteristics can be used to get the target partial subkey, keeping a count for each value of the target partial subkey value for which the difference in the input to the last rounds holds to the value expected from the differential characteristics.
+* Wireshark
+Wireshark is a network analysis utility. It can capture and save network requests from the host machine, and has inbuild filtering capabilities to detect attacks and anomalies in transferred packets on the network.
+
+On my Fedora 34 system, =wireshark= version 3.4.7 is available in the Fedora Package Repository as =wireshark=
+
+I installed it via
+
+#+begin_src
+$ sudo dnf install wireshark
+#+end_src
+
+[[./screenshots/wireshark-install.png]]
+
+#+ATTR_LATEX: :caption Wireshark recording packetwise transactions on my system
+[[./screenshots/wireshark-capture.png]]
