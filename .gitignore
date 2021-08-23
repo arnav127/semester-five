@@ -13,6 +13,9 @@
 *.c++
 *.c
 
+# Lexer files
+*.l
+
 # Executables
 *.exe
 *.out
