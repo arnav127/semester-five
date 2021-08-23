@@ -1,0 +1,102 @@
+#+TITLE: Compiler Design
+#+SUBTITLE: Lab 3
+#+AUTHOR: Seshal Jain
+#+OPTIONS: num:nil toc:nil ^:nil
+#+DATE: August 16, 2021
+#+LATEX_CLASS: assignment
+#+LATEX_HEADER: \definecolor{solarized-bg}{HTML}{fdf6e3}
+#+EXPORT_FILE_NAME: 191112436
+
+* Environment Setup
+Makefile
+#+begin_src makefile :tangle Makefile
+CC = gcc
+LEX = flex
+
+all: $(lexer)
+
+$(l): $(lexer).c ; $(CC) -o $@ $<
+
+$(l).c: $(lexer).l ; $(LEX) -o $@ $<
+
+clean: ; rm -rf $(lexer).c $(lexer)
+#+end_src
+
+* Count number of words
+#+begin_src c :tangle l3p1.l
+%{
+    #include<stdio.h>
+    int i = 0;
+%}
+
+%%
+
+[^( |\n)]+ i++;
+
+^\s*$ return 0;
+
+\n printf("Given string contains %d words.\n\n", i), i=0;
+
+([ ])+ ;
+
+%%
+
+int main() {
+    printf("Enter string: ");
+    yylex();
+    printf("Thanks for using lex.\n");
+}
+
+int yywrap() {
+    return 0;
+}
+#+end_src
+** Output
+#+begin_example
+$ export lexer=l3p1 make
+
+$ ./l3p1
+Enter string: Hello world!
+Given string contains 2 words.
+Lorem ipsum dolor sit amet
+Given string contains 3 words.
+#+end_example
+
+* Check if given input is odd or even
+#+begin_src c :tangle l3p2.l
+%{
+    #include<stdio.h>
+%}
+
+%%
+
+[0-9]*[02468] printf("%s is even.\n", yytext);
+[0-9]*[13579] printf("%s is odd.\n", yytext);
+
+^\s*$ return 0;
+
+([ ])+ |
+. ;
+
+%%
+
+int main() {
+    printf("Enter number: ");
+    yylex();
+}
+
+int yywrap() {
+    return 1;
+}
+#+end_src
+** Output
+#+begin_example
+$ export lexer=l3p2 make
+
+$ ./l3p2
+Enter number: 123
+123 is odd.
+
+1922
+1922 is even.
+#+end_example
