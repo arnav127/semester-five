@@ -1,0 +1,166 @@
+#+TITLE: Compiler Design
+#+SUBTITLE: Lab 2
+#+AUTHOR: Seshal Jain
+#+OPTIONS: num:nil toc:nil ^:nil
+#+DATE: August 9, 2021
+#+LATEX_CLASS: assignment
+#+EXPORT_FILE_NAME: 191112436
+
+* Valid Identifier
+A valid identifier can be represented by the regular expression: \\
+=[a-zA-Z][a-zA-Z0-9]*=
+#+begin_src c :tangle l2p1.c
+#include <stdio.h>
+
+int isAlpha(char c) {
+  if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z')) {
+    return 1;
+  }
+  return 0;
+}
+
+int isAlphaNum(char c) {
+  if (isAlpha(c) || (c >= '0' && c <= '9')) {
+    return 1;
+  }
+  return 0;
+}
+
+int state2(char *s, int i, int n) {
+  if (i == n)
+    return 1;
+  if (isAlphaNum(s[i])) {
+    return state2(s, i + 1, n);
+  }
+  return 0;
+}
+
+int state1(char *s, int i, int n) {
+  if (i == n)
+    return 0;
+  if (isAlpha(s[i]))
+    return state2(s, i + 1, n);
+  return 0;
+}
+
+int main() {
+  printf("valid: %d \n", state1("valid", 0, 5));
+  printf("1valid: %d \n", state1("1valid", 0, 6));
+  printf("valid1: %d \n", state1("valid1", 0, 6));
+  printf("notvalid@: %d \n", state1("notvalid@", 0, 9));
+  printf("@notvalid: %d \n", state1("@notvalid", 0, 9));
+}
+#+end_src
+
+Output
+#+begin_example
+valid: 1
+1valid: 0
+valid1: 1
+notvalid@: 0
+@notvalid: 0
+#+end_example
+
+* DFA for (0+1)*0
+#+begin_src c :tangle l2p2.c
+#include <stdio.h>
+
+int state1(char *, int, int);
+int state2(char *, int, int);
+int state3(char *, int, int);
+
+int state1(char *s, int i, int n) {
+  if (n == i) {
+    return 0;
+  }
+  if (s[i] == '0') {
+    return state3(s, i + 1, n);
+  }
+  if (s[i] == '1') {
+    return state2(s, i + 1, n);
+  }
+  return 0;
+}
+
+int state2(char *s, int i, int n) {
+  if (n == i) {
+    return 0;
+  }
+  if (s[i] == '0') {
+    return state3(s, i + 1, n);
+  }
+  if (s[i] == '1') {
+    return state2(s, i + 1, n);
+  }
+  return 0;
+}
+
+int state3(char *s, int i, int n) {
+  if (n == i) {
+    return 1;
+  }
+  if (s[i] == '0') {
+    return state3(s, i + 1, n);
+  }
+  if (s[i] == '1') {
+    return state2(s, i + 1, n);
+  }
+  return 0;
+}
+
+int main() {
+  printf("01010: %d \n", state1("01010", 0, 5));
+  printf("01011: %d \n", state1("01001", 0, 5));
+  return 0;
+}
+#+end_src
+
+Output
+#+begin_example
+01010: 1
+01011: 0
+#+end_example
+** Minimised
+#+begin_src c :tangle l2p3.c
+ #include <stdio.h>
+
+ int state1(char *, int, int);
+ int state2(char *, int, int);
+
+ int state1(char *s, int i, int n) {
+   if (n == i) {
+     return 0;
+   }
+   if (s[i] == '0') {
+     return state2(s, i + 1, n);
+   }
+   if (s[i] == '1') {
+     return state1(s, i + 1, n);
+   }
+   return 0;
+ }
+
+ int state2(char *s, int i, int n) {
+   if (n == i) {
+     return 1;
+   }
+   if (s[i] == '0') {
+     return state2(s, i + 1, n);
+   }
+   if (s[i] == '1') {
+     return state1(s, i + 1, n);
+   }
+   return 0;
+ }
+ int main() {
+   printf("01010: %d \n", state1("01010", 0, 5));
+   printf("01011: %d \n", state1("01001", 0, 5));
+   return 0;
+ }
+#+end_src
+
+Output
+#+begin_example
+01010: 1
+01011: 0
+#+end_example
