@@ -1,0 +1,125 @@
+#+TITLE: Compiler Design
+#+SUBTITLE: Lab 4
+#+AUTHOR: Seshal Jain
+#+OPTIONS: num:nil toc:nil ^:nil
+#+DATE: August 23, 2021
+#+LATEX_CLASS: assignment
+#+LATEX_HEADER: \definecolor{solarized-bg}{HTML}{fdf6e3}
+#+EXPORT_FILE_NAME: 191112436
+
+* Environment Setup
+Makefile
+#+begin_src makefile :tangle Makefile
+CC = gcc
+LEX = flex
+
+all: $(lexer)
+
+$(l): $(lexer).c ; $(CC) -o $@ $<
+
+$(l).c: $(lexer).l ; $(LEX) -o $@ $<
+
+clean: ; rm -rf $(lexer).c $(lexer)
+#+end_src
+* DFA for a C Program
+#+begin_src c :tangle l4p1.l
+%{
+    #include <stdio.h>
+    #include <string.h>
+
+%}
+
+%%
+
+"auto"|"break"|"case"|"char"|"const"|"continue"|"default"|"do"|"double"|"else"|"enum"|"extern"|"float"|"for"|"goto"|"if"|"int"|"long"|"register"|"return"|"short"|"signed"|"sizeof"|"static"|"struct"|"switch"|"typedef"|"union"|"unsigned"|"void"|"volatile"|"while" {
+    printf("Identified %s as a keyword\n", yytext);
+}
+
+"+"|"-"|"*"|"/" {
+    printf("Identified %s as an arithmetic operator\n", yytext);
+}
+
+
+"<"|">"|"=="|"!="|">"|"<"|">="|"<=" {
+    printf("Identified %s as a comparison operator\n", yytext);
+}
+
+"="|"+="|"-="|"*="|"/=" {
+    printf("Identified %s as a assignment operator\n", yytext);
+}
+
+"&&"|"||"|"!" {
+    printf("Identified %s as a logical operator\n", yytext);
+}
+
+"&"|"|"|"^"|"~"|"<<"|">>" {
+    printf("Identified %s as a bitwise operator\n", yytext);
+}
+
+"//".*"\n" {
+    printf("Identified %s as a comment\n", yytext);
+}
+
+"/*"."*/" {
+    printf("Identified %s as a comment\n", yytext);
+}
+
+
+[+-]?(0|[1-9][0-9]*) {
+    printf("Identified %s as an integer\n", yytext);
+}
+
+^[0-9]+[.][0-9]+([{eE][+-]?[0-9]+)?$ {
+    printf("Identified %s as a floating point number\n", yytext);
+}
+
+"#".*"\n" {
+    printf("Identified %s as a preprocessor statement\n", yytext);
+}
+
+"'"."'" {
+    printf("Identified %s as a character\n", yytext);
+}
+
+"\"".*"\"" {
+    printf("Identified %s as a string\n", yytext);
+}
+
+
+[a-zA-Z_][a-zA-Z0-9_]* {
+    printf("Identified %s as a identifier\n", yytext);
+}
+
+
+"\n" {printf("Enter string: ");}
+
+.*  {printf("The pattern could not be matched!\n");}
+
+%%
+
+int yywrap(){}
+
+int main()
+{
+    printf("Enter string: ");
+    yylex();
+    return 0;
+}
+#+end_src
+** Output
+#+begin_example
+$ export lexer=l4p1
+$ make
+
+$ ./l4p1
+Enter string: main
+Identified main as a identifier
+Enter string: int
+Identified int as a keyword
+Enter string: +
+Identified + as an arithmetic operator
+Enter string: ~
+Identified ~ as a bitwise operator
+Enter string: %
+The pattern could not be matched!
+#+end_example
