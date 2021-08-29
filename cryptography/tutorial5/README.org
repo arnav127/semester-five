@@ -1,0 +1,55 @@
+#+TITLE: Cryptography
+#+SUBTITLE: Tutorial 5
+#+AUTHOR: Seshal Jain
+#+OPTIONS: num:nil toc:nil
+#+DATE: August 25, 2021
+#+LATEX_CLASS: assignment
+#+LATEX_HEADER: \definecolor{solarized-bg}{HTML}{fdf6e3}
+#+EXPORT_FILE_NAME: 191112436
+
+* Image Steganography
+My primary operating system, Fedora 34, is not supported by the developer, I could not find a release for this software which runs on Linux.
+* Steghide
+Steghide is a steganography program that is able to hide data in various kinds of image- and audio-files. The color- respectively sample-frequencies are not changed thus making the embedding resistant against first-order statistical tests.
+
+It can compress embedded data, encrypt the embedded data and can perform automatic integrity checking using a checksum. For cover file, we can use JPEG, BMP, WAV and AU file formats for use as cover file, while for secret data any type of file can be used.
+** Installation
+Installing =steghide= is quite straightforward:
+
+#+begin_src sh
+sudo dnf install steghide
+#+end_src
+
+[[./screenshots/installation.png]]
+** Usage
+From the =steghide= manpage,
+[[./screenshots/manpage.png]]
+The text to be hidden can be passed either through a file or direct from standard input. 
+
+Some options used are:
+- =-ef= filename select the file to embed that is the hidden text
+- =-cf= filename select the image or audio to act as cover
+- =-sf= filename name the new file to be created (by default cover file is updated)
+- =-p= passphrase the password to be used as symmetric key cipher.
+
+1. *Embed text* \\
+  Embedding text from file =data=
+  #+begin_src shell
+$ steghide embed --coverfile image.jpg --embedfile data --passphrase password --stegofile stego.jpg
+#+end_src
+
+- *Info*
+  Checking if data has been embedded to the file
+  #+begin_src shell
+$ steghide info stego.jpg
+#+end_src
+
+- *Extract*
+  Extracting information from file, providing a passphrase
+  #+begin_src shell
+$ steghide extract --stegofile stego.jpg -p password
+#+end_src
+
+[[./screenshots/execution.png]]
+
+The data is extracted to =data=
