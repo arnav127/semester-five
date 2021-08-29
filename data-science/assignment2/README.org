@@ -1,0 +1,124 @@
+#+TITLE: Data Science
+#+SUBTITLE: Assignment 2
+#+AUTHOR: Seshal Jain
+#+OPTIONS: num:nil toc:nil ^:nil
+#+DATE: August 28, 2021
+#+LATEX_CLASS: assignment
+#+LATEX_HEADER: \definecolor{solarized-bg}{HTML}{fdf6e3}
+#+EXPORT_FILE_NAME: 191112436
+
+* Program 1
+Program to find the indexes of multiple occuraces of a given character in a string
+#+begin_src python :tangle a2p1.py
+def multiple_occurance(char: str, string:str) -> list[int]:
+    if len(char)!=1:
+        raise ValueError(f"Length of argument `char` should be 1. Found {len(char)}.")
+    ans = []
+    for (ind, s) in enumerate(string, 0):
+        if s == char:
+            ans.append(ind)
+    return ans
+
+test_strings = ["character", "abacus", "cactus", "mississipi", "mississipi"]
+test_chars = ["a", "a", "c", "i", "s"]
+
+for (char, string) in zip(test_chars, test_strings):
+    repeats = multiple_occurance(char, string)
+    print(f"{char} repeated {len(repeats)} times in {string} at\
+    {','.join(map(str, repeats))}")
+#+end_src
+
+** Output
+#+begin_example
+a repeated 2 times in character at    2,4
+a repeated 2 times in abacus at    0,2
+c repeated 2 times in cactus at    0,2
+i repeated 4 times in mississipi at    1,4,7,9
+s repeated 4 times in mississipi at    2,3,5,6
+#+end_example
+
+* Program 2
+Program to concatenate two lists
+#+begin_src python :tangle a2p2.py
+list_a = ["a", "boy", "is", "living"]
+list_b = ["in", "the", "shadow", "of", "this", "valley"]
+print(list_a)
+print(list_b)
+#+end_src
+
+Method 1: using + operator
+#+begin_src python :tangle a2p2.py
+list_concat_plus = list_a + list_b
+print(list_concat_plus)
+#+end_src
+
+Method 2: Using unpacking operator *
+#+begin_src python :tangle a2p2.py
+list_concat_unpack = [*list_a, *list_b]
+print(list_concat_unpack)
+#+end_src
+
+Method 3: using iterables
+#+begin_src python :tangle a2p2.py
+import itertools
+iterator = itertools.chain(list_a, list_b)
+list_concat_chain = list(iterator)
+print(list_concat_chain)
+#+end_src
+
+Method 4: By extending the first list
+#+begin_src python :tangle a2p2.py
+list_concat_copyA = list_a.copy()
+list_concat_copyA.extend(list_b)
+print(list_a)
+print(list_concat_copyA)
+#+end_src
+
+Method 6: Using For loop and and append
+#+begin_src python :tangle a2p2.py
+list_concat_for = list_a.copy()
+for e in list_b:
+    list_concat_for.append(e)
+print(list_a)
+print(list_concat_for)
+#+end_src
+** Output
+#+begin_example
+['a', 'boy', 'is', 'living']
+['in', 'the', 'shadow', 'of', 'this', 'valley']
+['a', 'boy', 'is', 'living', 'in', 'the', 'shadow', 'of', 'this', 'valley']
+['a', 'boy', 'is', 'living', 'in', 'the', 'shadow', 'of', 'this', 'valley']
+['a', 'boy', 'is', 'living', 'in', 'the', 'shadow', 'of', 'this', 'valley']
+['a', 'boy', 'is', 'living']
+['a', 'boy', 'is', 'living', 'in', 'the', 'shadow', 'of', 'this', 'valley']
+['a', 'boy', 'is', 'living']
+['a', 'boy', 'is', 'living', 'in', 'the', 'shadow', 'of', 'this', 'valley']
+#+end_example
+* Program 3
+Program to take two numbers as input and add them, removing any digits
+#+begin_src python :tangle a2p3.py
+def clean_num(num: str) -> int:
+    cleaned = 0
+    for e in num:
+        ival = ord(e) - ord("0")
+        if 0<=ival<=9:
+            cleaned = cleaned*10 + ival
+    return cleaned
+
+def add_dirty(num1: str, num2: str) -> (int, int, int):
+    num1_cleaned = clean_num(num1)
+    num2_cleaned = clean_num(num2)
+    return (num1_cleaned, num2_cleaned, num1_cleaned + num2_cleaned)
+
+test_nums = [("a12", "12bb0"), ("123PTS98", "23CV5L67"), ("999A@", "02323B00#)")]
+
+for (num1, num2) in test_nums:
+    a = add_dirty(num1, num2)
+    print(f'{a[0]} + {a[1]} = {a[2]}')
+#+end_src
+** Output
+#+begin_example
+12 + 120 = 132
+12398 + 23567 = 35965
+999 + 232300 = 233299
+#+end_example
