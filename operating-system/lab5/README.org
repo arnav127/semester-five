@@ -1,0 +1,194 @@
+#+TITLE: Operating System
+#+SUBTITLE: Lab 5
+#+AUTHOR: Seshal Jain
+#+OPTIONS: num:nil toc:nil ^:nil
+#+DATE: August 17, 2021
+#+LATEX_CLASS: assignment
+#+LATEX_HEADER: \definecolor{solarized-bg}{HTML}{fdf6e3}
+#+EXPORT_FILE_NAME: 191112436_5
+* Process-related System calls provided by C in Linux
+** =exec()=
+This function executes command in Bash. It does not create a new process, rather replaces Bash with the command to be executed. In successful execution, control does not return to calling process.
+#+begin_src c++
+int execl(const char *path, const char *arg, ...);
+int execlp(const char *file, const char *arg, ...);
+int execle(const char *path, const char *arg, ..., char *const envp[]);
+int execv(const char *path, char *const argv[]);
+int execvp(const char *file, char *const argv[]);
+int execvpe(const char *file, char *const argv[], char *const envp[]);
+#+end_src
+
+** =fork()=
+This is the primary method of process creation on Unix. It creates a new copy of the process, called the /child/, while the calling process becomes the parent. \\
+If parent process crashes for some reason, the child process is killed as well.
+
+#+begin_src c++
+pid_t fork(void);
+#+end_src
+
+** =wait()=
+waits for any running process. Used in conjugation with some process or job ID. When multiple processes are running in the shell, waits for the last command, since current shell only knows the process ID of the last command. If no process ID is passed, it waits for all current child processes to complete execution, and returns the exit status.
+
+#+begin_src c++
+pid_t wait(int *wstatus);
+pid_t waitpid(pid_t pid, int *wstatus, int options);
+int waitid(idtype_t idtype, id_t id, siginfo_t *infop, int op‐ tions);
+#+end_src
+* Various =exec()= system calls
+There are many members in the exec family which are shown below:
+#+begin_src c++
+int execvp(const char *file, char *const argv[]);
+#+end_src
+Using this command, the created child process does not have to run the same program as the parent process does. The exec type system calls allow a process to run any program files, which include a binary executable or a shell script.
+#+begin_src c++
+int execv(const char *path, char *const argv[]);
+#+end_src
+This is very similar to execvp() function in terms of syntax as well.
+#+begin_src c++
+int execlp(const char *file, const char *arg,.../*(char *) NULL */);
+#+end_src
+#+begin_src c++
+int execl(const char *path, const char *arg,.../* (char *) NULL */);
+#+end_src
+
+These two also serve the same purpose but the syntax of them are a bit different.
+
+#+begin_src c++
+int execvpe(const char*file, char*const argv[], char *const envp[]);
+#+end_src
+#+begin_src c++
+int execle(const char *path, const char *arg, ... /*, (char *) NULL, char * const envp[] */);
+#+end_src
+These two also serve the same purpose but the syntax of them are a bit different from all the above members of the exec family.
+* Using =fork()= to create new processes
+#+begin_src c :tangle l5p1.c
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <unistd.h>
+
+void create_processes(int n) {
+  pid_t pid;
+  printf("+---------+---------+\n");
+  printf("| Parent  |   Child |\n");
+  printf("+---------+---------+\n");
+
+  for (int i = 1; i <= n; i++) {
+    pid = fork();
+    if (!pid) {
+      printf("|  %d  |  %d  |\n", getppid(), getpid());
+      exit(0);
+    }
+  }
+  // now let us wait
+  for (int i = 1; i <= n; i++) {
+    wait(NULL);
+  }
+  printf("+---------+---------+\n");
+}
+
+int main(int argc, char **argv) {
+  int n;
+  if (argc == 2) {
+    n = atoi(argv[1]);
+    create_processes(n);
+    return 0;
+  }
+  printf("Program to take input and generate of child processes:\n");
+  printf("Enter n: ");
+  scanf("%d", &n);
+  create_processes(n);
+}
+#+end_src
+
+** Output
+#+begin_example
+$ ./l5p1 
+Program to take input and generate of child processes:
+Enter n: 5
++---------+---------+
+| Parent  |   Child |
++---------+---------+
+|  59879  |  59880  |
+|  59879  |  59881  |
+|  59879  |  59884  |
+|  59879  |  59883  |
+|  59879  |  59882  |
++---------+---------+
+
+$ ./l5p1 2
++---------+---------+
+| Parent  |   Child |
++---------+---------+
+|  59889  |  59890  |
+|  59889  |  59891  |
++---------+---------+
+#+end_example
+* Parent process waiting for child process
+l5p2.c
+#+begin_src c :tangle l5p2.c
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <unistd.h>
+
+int main(int argc, char **argv) {
+  pid_t child_pid, wpid;
+  int status = 0;
+
+  // Father code (before child processes start)
+  if (fork() == 0) {
+    static char *args[] = {"./l5p3", NULL};
+    execvp(args[0], args);
+    exit(0);
+  }
+
+  printf("Waiting for child to finish...\n");
+  while ((wpid = wait(&status)) > 0)
+    ;
+  printf("\nChild finished and parent continues...\n");
+
+  return 0;
+}
+#+end_src
+
+l5p3.c
+#+begin_src c :tangle l5p3.c
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <unistd.h>
+
+int main() {
+  printf("\n+------------------------------------+\n");
+  printf("| ");
+  sleep(1);
+  printf(".");
+  usleep(500);
+  printf(".");
+  sleep(1);
+  printf(".");
+  usleep(500);
+  printf(".");
+  sleep(1);
+  printf(". ");
+  usleep(500);
+  printf("                             |\n");
+  printf("| The slow program has finished.     |\n");
+  printf("+------------------------------------+\n");
+  return 0;
+}
+#+end_src
+** Output
+#+begin_example
+$ ./l5p2
+Waiting for child to finish...
+
++------------------------------------+
+| .....                              |
+| The slow program has finished.     |
++------------------------------------+
+#+end_example
