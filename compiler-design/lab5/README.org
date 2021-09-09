@@ -1,0 +1,169 @@
+#+TITLE: Compiler Design
+#+SUBTITLE: Lab 5
+#+AUTHOR: Seshal Jain
+#+OPTIONS: num:nil toc:nil ^:nil
+#+DATE: September 06, 2021
+#+LATEX_CLASS: assignment
+#+LATEX_HEADER: \definecolor{solarized-bg}{HTML}{fdf6e3}
+#+EXPORT_FILE_NAME: 191112436
+
+* Environment Setup
+Makefile
+#+begin_src makefile :tangle Makefile
+CC = gcc
+LEX = flex
+
+all: $(lexer)
+
+$(l): $(lexer).c ; $(CC) -o $@ $<
+
+$(l).c: $(lexer).l ; $(LEX) -o $@ $<
+
+clean: ; rm -rf $(lexer).c $(lexer)
+#+end_src
+* Program to recognize state name from entered pincode
+#+begin_src c :tangle l5p1.l
+%{
+  #include<stdio.h>
+%}
+
+%%
+
+11[0-9]{4}    printf("\n%s is for Delhi", yytext);
+1[23][0-9]{4}    printf("\n%s is for Haryana", yytext);
+1[45][0-9]{4}    printf("\n%s is for Punjab", yytext);
+16[0-9]{4}    printf("\n%s is for Chandigarh", yytext);
+17[0-9]{4}    printf("\n%s is for Himachal Pradesh", yytext);
+1[89][0-9]{4}    printf("\n%s is for Jammu & Kashmir", yytext);
+2[0-8][0-9]{4}    printf("\n%s is for Uttar Pradesh, Uttarakhand",yytext);
+3[0-4][0-9]{4}    printf("\n%s is for Rajasthan", yytext);
+396210$    printf("\n%s is for Daman & Diu", yytext);
+396[0-9]{3}    printf("\n%s is for Dadra & Nagar Haweli", yytext);
+3[6-9][0-9]{4}    printf("\n%s is for Gujarat", yytext);
+403[0-9]{3}    printf("\n%s is for Goa", yytext);
+4[0-4][0-9]{4}    printf("\n%s is for Maharashtra", yytext);
+4[5-8][0-9]{4}    printf("\n%s is for Madhya Pradesh", yytext);
+49[0-9]{4}    printf("\n%s is for Chhattisgarh", yytext);
+50[0-9]{4}    printf("\n%s is for Telangana", yytext);
+5[1-3][0-9]{4}    printf("\n%s is for Andhra Pradesh", yytext);
+5[6-9][0-9]{4}    printf("\n%s is for Karnataka", yytext);
+605[0-9]{3}    printf("\n%s is for Puducherry", yytext);
+6[0-6][0-9]{4}    printf("\n%s is for Tamil Nadu", yytext);
+682[0-9]{3}    printf("\n%s is for Lakshadweep", yytext);
+6[7-9][0-9]{4}    printf("\n%s is for Kerala", yytext);
+737[0-9]{3}    printf("\n%s is for Sikkim", yytext);
+744[0-9]{3}    printf("\n%s is for Andaman & Nicober Islands", yytext);
+7[0-4][0-9]{4}    printf("\n%s is for West Bengal", yytext);
+7[5-7][0-9]{4}    printf("\n%s is for Odisha", yytext);
+78[0-9]{4}    printf("\n%s is for Assam", yytext);
+79[0-2][0-9]{3}    printf("\n%s is for Arunachal Pradesh", yytext);
+79[34][0-9]{3}    printf("\n%s is for Meghalaya", yytext);
+795[0-9]{3}    printf("\n%s is for Manipur", yytext);
+796[0-9]{3}    printf("\n%s is for Mizoram", yytext);
+79[78][0-9]{3}    printf("\n%s is for Nagaland", yytext);
+799[0-9]{3}    printf("\n%s is for Tripura", yytext);
+8[0-5][0-9]{4}    printf("\n%s is for Bihar, Jharkhand", yytext);
+9[0-9]{5}    printf("\n%s is for Army Postal Service", yytext);
+
+^\s*$ return 0;
+
+[^ \t\n]+  printf("\nInvalid Postal Code: %s", yytext);
+
+\n printf("\n\nEnter Postal Code: ");
+
+%%
+
+int main() {
+    printf("Enter Postal Code: ");
+    yylex();
+}
+
+int yywrap(){}
+#+end_src
+** Output
+#+begin_example
+~/D/M/S/A/compiler-design/lab6 [main] λ export lexer=l6p1
+~/D/M/S/A/compiler-design/lab6 [main] λ make
+flex  -t l6p1.l > l6p1.c
+gcc    -c -o l6p1.o l6p1.c
+gcc   l6p1.o   -o l6p1
+rm l6p1.c l6p1.o
+~/D/M/S/A/compiler-design/lab5 [main] λ ./l5p1
+Enter Postal Code: 452003
+
+452003 is for Madhya Pradesh
+
+Enter Postal Code: 895623
+
+Invalid Postal Code: 895623
+
+Enter Postal Code: 90000
+
+Invalid Postal Code: 90000
+
+Enter Postal Code: 900000
+
+900000 is for Army Postal Service
+
+Enter Postal Code: 809999
+
+809999 is for Bihar, Jharkhand
+#+end_example
+* Program to check for valid mobile number from country code
+#+begin_src c :tangle l5p2.l
+%{
+    #include<stdio.h>
+%}
+
+%%
+
+(\+91-?|0)?(9206|9132|7269|7270|7271|7272|7273|7274|7279|8383|8433|7210|8268|8599|8620|8621|8622)-?[0-9]{6} printf("\n%s is for Aircel", yytext);
+
+(\+91-?|0)?(9109|9172|9108|8942|7899|9079|9100|9116|9521)-?[0-9]{6} printf("\n%s is for Airtel", yytext);
+
+(\+91-?|0)?(9516|9126|9146|9514|9134|9071|7265|9515|9133|7871|8546|8548|8549|8550|9061|9128)-?[0-9]{6} printf("\n%s is for Idea", yytext);
+
+(\+91-?|0)?(9124|9147|9151)-?[0-9]{6} printf("\n%s is for Tata Docomo", yytext);
+
+(\+91-?|0)?(7266|7267|7268|9104|9119|9170|9520)-?[0-9]{6} printf("\n%s is for Uninor", yytext);
+
+(\+91-?|0)?(8999|9144|9513|9072|7280|7281|7282|7283|9073|8117|8118|8270|8291)-?[0-9]{6} printf("\n%s is for Vodafone", yytext);
+
+^\s*$ return 0;
+
+[^ \t\n]+ printf("\nInvalid Mobile Number: %s", yytext);
+
+\n printf("\n\nEnter Mobile Number: ");
+
+%%
+
+int main() {
+    printf("Enter Mobile Number: ");
+    yylex();
+    printf("Thanks for using lex.\n");
+}
+
+int yywrap(){}
+#+end_src
+** Output
+#+begin_example
+~/D/M/S/A/compiler-design/lab6 [main] λ export lexer=l6p1
+~/D/M/S/A/compiler-design/lab6 [main] λ make
+flex  -t l6p1.l > l6p1.c
+gcc    -c -o l6p1.o l6p1.c
+gcc   l6p1.o   -o l6p1
+rm l6p1.c l6p1.o
+~/D/M/S/A/compiler-design/lab6 [main] λ ./l6p1
+Enter numbers:
+7389061102
+Valid Mobile Number
+
+9039123456
+Valid Mobile Number
+
+4526578903
+Invalid Match
+
+8525790
+Invalid Match
+#+end_example
