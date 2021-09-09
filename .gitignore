@@ -37,6 +37,9 @@
 # PDFs
 *.pdf
 
+# Assembly files
+*.asm
+
 # minted
 _minted*
 *.pyg
