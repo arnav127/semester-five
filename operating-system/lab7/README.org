@@ -1,0 +1,199 @@
+#+TITLE: Operating System
+#+SUBTITLE: Lab 7
+#+AUTHOR: Seshal Jain
+#+OPTIONS: num:nil toc:nil ^:nil
+#+DATE: August 31, 2021
+#+LATEX_CLASS: assignment
+#+LATEX_HEADER: \definecolor{solarized-bg}{HTML}{fdf6e3}
+#+EXPORT_FILE_NAME: 191112436_7
+* C Program to Simulate Multilevel Feedback Queue
+#+begin_src c :tangle l7p1.c
+ #include <stdbool.h>
+ #include <stdio.h>
+ #include <stdlib.h>
+
+ struct Process {
+   int PID;
+   int arr, bur, rem, rt, tat, wt;
+   struct Process *next;
+ } typedef Process;
+
+ Process *head1 = NULL, *tail1;
+ Process *head2 = NULL, *tail2;
+ Process *head3 = NULL, *tail3;
+ Process *head4 = NULL, *tail4;
+
+ Process *create(int PID, int bur);
+ void enqueue(Process **head, Process **tail, Process *proc);
+ Process *dequeue(Process **head);
+
+ void MLF(int n, int q1, int q2, int q3, int rr1, int rr2);
+ void print(Process *head);
+
+ int main() {
+   int n;
+   printf("Enter the number of processes: ");
+   scanf("%d", &n);
+
+   printf("Enter the data of each process, space-separated:\n");
+   printf("PID B\n");
+   int pid, arr, bur;
+
+   for (int i = 0; i < n; i++) {
+     scanf("%d %d", &pid, &bur);
+     enqueue(&head1, &tail1, create(pid, bur));
+   }
+
+   int q1quanta = 8, q2quanta = 16, q3quanta = 32;
+   int rr1quanta = 2, rr2quanta = 4;
+
+   MLF(n, q1quanta, q2quanta, q3quanta, rr1quanta, rr2quanta);
+   print(head4);
+ }
+
+ Process *create(int PID, int bur) {
+   Process *proc = (Process *)malloc(sizeof(Process));
+   proc->PID = PID;
+   proc->arr = 0;
+   proc->bur = proc->rem = bur;
+   return proc;
+ }
+
+ void enqueue(Process **head, Process **tail, Process *proc) {
+   if (*head) {
+     (*tail)->next = proc;
+     ,*tail = (*tail)->next;
+   } else {
+     ,*head = proc;
+     ,*tail = *head;
+   }
+   (*tail)->next = NULL;
+ }
+ Process *dequeue(Process **head) {
+   if (*head == NULL)
+     return NULL;
+   Process *p = *head;
+   ,*head = (*head)->next;
+   return p;
+ }
+
+ void MLF(int n, int q1, int q2, int q3, int rr1, int rr2) {
+   int time = 0, count = 0, t = 0;
+   Process *p;
+   while (count - n) {
+     t = 0;
+     while (t < q1 && head1) {
+       p = dequeue(&head1);
+       if (p->rem == p->bur)
+         p->rt = time + t - p->arr;
+       if (p->rem <= rr1) {
+         t += p->rem;
+         p->rem = 0;
+         p->tat = time + t - p->arr;
+         p->wt = p->tat - p->bur;
+         enqueue(&head4, &tail4, p);
+         count++;
+       } else {
+         p->rem -= t + rr1 <= q1 ? rr1 : q1 - t;
+         t = t + rr1 <= q1 ? t + rr1 : q1;
+         enqueue(&head2, &tail2, p);
+       }
+     }
+     while (head1) {
+       enqueue(&head2, &tail2, dequeue(&head1));
+     }
+     time += t;
+     t = 0;
+     while (t < q2 && head2) {
+       p = dequeue(&head2);
+       if (p->rem == p->bur)
+         p->rt = time + t - p->arr;
+       if (p->rem <= rr2) {
+         t += p->rem;
+         p->rem = 0;
+         p->tat = time + t - p->arr;
+         p->wt = p->tat - p->bur;
+         enqueue(&head4, &tail4, p);
+         count++;
+       } else {
+         p->rem -= t + rr2 <= q2 ? rr2 : q2 - t;
+         t = t + rr2 <= q2 ? t + rr2 : q2;
+         enqueue(&head3, &tail3, p);
+       }
+     }
+     while (head2) {
+       enqueue(&head3, &tail3, dequeue(&head2));
+     }
+     time += t;
+     // fcfs
+     t = 0;
+     while (t < q3 && head3) {
+       p = dequeue(&head3);
+       if (p->rem == p->bur)
+         p->rt = time + t - p->arr;
+       if (p->rem + t <= q3) {
+         // Process finished
+         t += p->rem;
+         p->rem = 0;
+         p->tat = time + t - p->arr;
+         p->wt = p->tat - p->bur;
+         enqueue(&head4, &tail4, p);
+         count++;
+       } else {
+         p->rem -= q3 - t;
+         t = q3;
+         enqueue(&head1, &tail1, p);
+       }
+     }
+     while (head3) {
+       enqueue(&head1, &tail1, dequeue(&head3));
+     }
+     time += t;
+   }
+ }
+
+ void print(Process *head) {
+   printf("\n");
+   printf("+---------------+---------------+---------------+---------------+\n");
+   printf("|    Process    |  Turnaround   |    Waiting    |   Response    |\n");
+   printf("|      ID       |     time      |     time      |     time      |\n");
+   printf("+---------------+---------------+---------------+---------------+\n");
+   float sumtat = 0, sumwt = 0, sumrt = 0, n = 0;
+   while (head) {
+     printf("|\t%d\t|\t%d\t|\t%d\t|\t%d\t|\n", head->PID, head->tat, head->wt,
+            head->rt);
+     sumtat += head->tat;
+     sumwt += head->wt;
+     sumrt += head->rt;
+     head = head->next;
+     n++;
+   }
+   printf("+---------------+---------------+---------------+---------------+\n");
+   printf("|    Average    |\t%.2f\t|\t%.2f\t|\t%.2f\t|\n", sumtat / n,
+          sumwt / n, sumrt / n);
+   printf("+---------------+---------------+---------------+---------------+\n");
+ }
+#+end_src
+** Output
+#+begin_example
+~/D/M/S/A/operating-system/lab7 [main] λ ./l7p1 
+Enter the number of processes: 4
+Enter the data of each process, space-separated:
+PID B
+1 4
+2 2
+3 6
+4 15
+
++---------------+---------------+---------------+---------------+
+|    Process    |  Turnaround   |    Waiting    |   Response    |
+|      ID       |     time      |     time      |     time      |
++---------------+---------------+---------------+---------------+
+|	2	|	4	|	2	|	2	|
+|	1	|	10	|	6	|	0	|
+|	3	|	14	|	8	|	4	|
+|	4	|	27	|	12	|	6	|
++---------------+---------------+---------------+---------------+
+|    Average    |	13.75	|	7.00	|	3.00	|
++---------------+---------------+---------------+---------------+
+#+end_example
