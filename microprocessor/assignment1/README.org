@@ -1,0 +1,131 @@
+#+TITLE: Microprocessor
+#+SUBTITLE: 8085 Assembly Programs
+#+AUTHOR: Seshal Jain
+#+OPTIONS: num:nil toc:nil ^:nil
+#+DATE: September 06, 2021
+#+LATEX_CLASS: assignment
+#+LATEX_HEADER: \definecolor{solarized-bg}{HTML}{fdf6e3}
+#+EXPORT_FILE_NAME: 191112436
+* 8-bit operation with 8-bit result
+** Addition
+#+begin_src asm :tangle a1p1.asm
+; Addition of two 8 bit numbers
+LXI H,4000
+MOV A,M
+INX H
+ADD M
+STA 4002
+HLT
+# ORG 4000
+# DB 23,68
+#+end_src
+
+[[./img/8baddition.png]]
+** Subtraction
+#+begin_src asm :tangle a1p2.asm
+; Subtraction of two 8 bit numbers
+LXI H,4000
+MOV A,M
+INX H
+SUB M
+STA 4002
+HLT
+# ORG 4000
+# DB A2,11
+#+end_src
+
+[[./img/8bsubtraction.png]]
+* 8-bit addition with 16-bit result
+#+begin_src asm :tangle a1p3.asm
+; Addition of two 8 bit numbers having 16 bit sum
+LXI H,4000
+MVI C,00
+MOV A,M
+INX H
+ADD M
+JNC CARRY
+INR C
+
+CARRY: STA 4003
+       MOV A,C
+       STA 4002
+       HLT
+
+# ORG 4000
+# DB E2,DF
+#+end_src
+
+[[./img/8b16baddition.png]]
+* 1's Complement of 8-bit number
+#+begin_src asm :tangle a1p4.asm
+; 1's complement of an 8 bit number
+LDA 4000
+CMA
+STA 4001
+HLT
+
+# ORG 4000
+# DB 23
+#+end_src
+
+[[./img/1scomplement.png]]
+* 2's complement of 8-bit number
+#+begin_src asm :tangle a1p5.asm
+; 2's complement of an 8 bit number
+LDA 4000
+CMA
+INR A
+STA 4001
+HLT
+
+# ORG 4000
+# DB ED
+#+end_src
+
+[[./img/2scomplement.png]]
+* Copying blocks of memory
+#+begin_src asm :tangle a1p6.asm
+; Copy 5 blocks of memory from 4000 to 5000 location
+MVI C,05
+LXI H,4000
+LXI D,5000
+JMP COPY
+
+COPY: MOV A,M
+XCHG
+MOV M,A
+INX H
+XCHG
+INX H
+DCR C
+JNZ COPY
+HLT
+# ORG 4000
+# DB 23,68,34,35,A7
+#+end_src
+
+[[./img/copymem.png]]
+* Shift 8 bit number by 1 bit
+#+begin_src asm :tangle a1p7.asm
+; Shift an 8-bit number left by 1 bit
+LDA 4000
+RLC
+STA 4001
+HLT
+# ORG 4000
+# DB 12
+#+end_src
+
+[[./img/8bshift.png]]
+* Shift 16 bit number by 1 bit
+#+begin_src asm :tangle a1p8.asm
+; Shift an 16-bit number left by 1 bit
+LHLD 4000
+DAD H
+SHLD 4002
+HLT
+# ORG 4000
+# DB 16,75
+#+end_src
+
+[[./img/16bshift.png]]
