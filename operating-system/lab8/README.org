@@ -1,0 +1,259 @@
+#+TITLE: Operating System
+#+SUBTITLE: Lab 8
+#+AUTHOR: Seshal Jain
+#+OPTIONS: num:nil toc:nil ^:nil
+#+DATE: September 07, 2021
+#+LATEX_CLASS: assignment
+#+LATEX_HEADER: \definecolor{solarized-bg}{HTML}{fdf6e3}
+#+EXPORT_FILE_NAME: 191112436_8
+* Process Related Linux commands
+** Demonstrate the use of =bg= and =fg= commands in Linux
+The commands =bg= and =fg= are short for background and foreground respectively. \\
+=fg= brings any process from the background to the foreground in the running shell. \\
+=bg= is opposite to this as it sends the process in the background for the current shell.
+
+To run a process in the background, we append =&= when executing the command:
+#+begin_example
+[archgaelix@blu lab8]$ sleep 10 &
+[1] 22263
+#+end_example
+
+To view currently running jobs, we use =jobs -l=:
+#+begin_example
+[archgaelix@blu lab8] $ jobs -l
+[1]+ 22263 Running                 sleep 10 &
+#+end_example
+
+We can move this process to the foreground by using =fg %1= where =1= is the number of this process obtained from =jobs=
+#+begin_example
+[archgaelix@blu lab8]$ fg %1
+sleep 10
+#+end_example
+This process runs for remaining time from the original 10 seconds.
+\\
+A running process can be sent to the background by using =C-z=.
+** Explore all fields of =top= command in Linux.
+The =top= displays linux processes and a dynamic real-time view of the running system. The various flags/switches allow us to see system summary information as well as a list of processes or threads currently being managed by the Linux kernel.
+The columns listed are:
+- PID: unique process ID
+- USER: username of the task's owner.
+- PR: priority of the task.
+- NI: nice value of the task \\
+  A negative value means higher priority and a positive value means lower priority.
+- VIRT: virtual memory size
+- RES: resident memory size
+- SHR: shared memory size
+- S: process status
+  + D: uninterruptible sleep
+  + I: idle
+  + R: running
+  + S: sleeping
+  + T: stopped by job control signal
+  + t: stopped by debugger during trace
+  + Z: zombie process
+- %CPU: CPU usage
+- %MEM: memory usage
+- TIME+: CPU time
+- COMMAND: The Command name/line
+
+#+begin_example
+[archgaelix@blu lab8]$ top
+top - 16:22:08 up 16:39,  1 user,  load average: 0.29, 0.39, 0.39
+Tasks: 288 total,   1 running, 287 sleeping,   0 stopped,   0 zombie
+%Cpu(s):  2.8 us,  4.2 sy,  0.0 ni, 91.5 id,  0.0 wa,  0.0 hi,  1.4 si,  0.0 st
+MiB Mem :   7829.0 total,    525.2 free,   3690.8 used,   3613.0 buff/cache
+MiB Swap:   7829.0 total,   7797.2 free,     31.8 used.   3360.3 avail Mem
+
+    PID USER      PR  NI    VIRT    RES    SHR S  %CPU  %MEM     TIME+ COMMAND
+   2295 archgae+  20   0  627544  77044  45816 S   5.9   1.0   2:57.54 Xwayland
+   2336 archgae+  20   0  914248  62060  47400 S   5.9   0.8   0:19.72 ibus-x11
+      1 root      20   0  177668  17968  10496 S   0.0   0.2   0:04.09 systemd
+      2 root      20   0       0      0      0 S   0.0   0.0   0:00.02 kthreadd
+      3 root       0 -20       0      0      0 I   0.0   0.0   0:00.00 rcu_gp
+      4 root       0 -20       0      0      0 I   0.0   0.0   0:00.00 rcu_par_gp
+      6 root       0 -20       0      0      0 I   0.0   0.0   0:00.00 kworker/0:+
+      9 root       0 -20       0      0      0 I   0.0   0.0   0:00.00 mm_percpu_+
+     10 root      20   0       0      0      0 S   0.0   0.0   0:00.00 rcu_tasks_+
+     11 root      20   0       0      0      0 S   0.0   0.0   0:00.00 rcu_tasks_+
+     12 root      20   0       0      0      0 S   0.0   0.0   0:00.00 rcu_tasks_+
+     13 root      20   0       0      0      0 S   0.0   0.0   0:02.72 ksoftirqd/0
+     14 root      20   0       0      0      0 I   0.0   0.0   0:07.91 rcu_sched
+     15 root      rt   0       0      0      0 S   0.0   0.0   0:00.03 migration/0
+     16 root      20   0       0      0      0 S   0.0   0.0   0:00.00 cpuhp/0
+     17 root      20   0       0      0      0 S   0.0   0.0   0:00.00 cpuhp/1
+     18 root      rt   0       0      0      0 S   0.0   0.0   0:00.12 migration/1
+     19 root      20   0       0      0      0 S   0.0   0.0   0:00.20 ksoftirqd/1
+     21 root       0 -20       0      0      0 I   0.0   0.0   0:00.00 kworker/1:+
+     22 root      20   0       0      0      0 S   0.0   0.0   0:00.00 cpuhp/2
+     23 root      rt   0       0      0      0 S   0.0   0.0   0:00.12 migration/2
+     24 root      20   0       0      0      0 S   0.0   0.0   0:00.59 ksoftirqd/2
+     26 root       0 -20       0      0      0 I   0.0   0.0   0:00.00 kworker/2:+
+     27 root      20   0       0      0      0 S   0.0   0.0   0:00.00 cpuhp/3
+     28 root      rt   0       0      0      0 S   0.0   0.0   0:00.12 migration/3 top - 16:22:11 up 16:40,  1 user,  load average: 0.29, 0.39, 0.39
+#+end_example
+** Demonstrate the use of =nice= command in linux
+The nice command starts a new program with the modified scheduling priority. It is shown by niceness value which ranges from -20 (most favorable) to 19 (least favorable)
+
+It is useful when we need to give high or low priority to tasks, like memory intensive tasks may be given low priority.
+#+begin_example
+[archgaelix@blu lab8]$ nice -15 sleep 25
+#+end_example
+This sets the Nice Value of the command to 15.
+** Demonstrate the use of =nohup= command in Linux
+=nohup= is short for /NO HANG UP/. It means that the process would ignore any hang-up signals. Usually when the terminal is exiting, it sends SIGHUP (Signal Hang UP) to every process in Linux systems under that shell. Normally, the stdin is not available to them and the output is piped into nohup.out for stdout and stderr (unless modified using flags).
+#+begin_example
+[archgaelix@blu lab8]$ nohup sleep 15 &
+#+end_example
+* Main Memory Related Linux commands
+** Describe a way to find out the page size in your system (Linux)
+#+begin_example sh :results output :wrap example
+[archgaelix@blu lab8]$ getconf PAGESIZE
+4096
+#+end_example
+Therefore, the page size in the system is 4096 bytes or 4 kB
+** Explore all fields in the output of =free= command in Linux
+The free command displays the amount of free and used physical and swap memory
+- total: total installed memory
+- used: used memory
+- free: unused memory
+- shared: memory used (mostly) by tmpfs
+- buffers: memory used by kernel buffers
+- cache: memory used by the page cache and slabs
+- buff/cache: sum of buffers and cache
+- available: estimation of how much memory is available for starting new applications, without swapping
+#+begin_example
+[archgaelix@blu lab8]$ free
+               total        used        free      shared  buff/cache   available
+Mem:         8016900     3897064      369068      548548     3750768     3277520
+Swap:        8016892       32520     7984372
+#+end_example
+** Describe the content of =/proc/meminfo=
+The =/proc= directory is a pseudo filesystem created by the kernel in memory and does not exist on disk. \\
+The =meminfo= file contains the values or report of amount of free and used memory. The =free= command uses this to report the amount of free and used memory (both physical and swap) on the system as well as the shared memory and buffers used by the kernel.
+- MemTotal: Total usable RAM.
+- MemFree: The sum of Low Free+High Free.
+- MemAvailable: Estimate of available memory for starting new applications.
+- Buffers: Temporary storage for raw disk blocks.
+- Cached: In-memory cache for files read from the disk.
+- Active: Memory used recently and usually not reclaimed unless absolutely necessary.
+- Inactive: Less recently used memory.
+- SwapTotal: Total swap space available
+- SwapFree: Swap space currently unused
+- Mapped: Files mapped into memory
+- Shmem: Amount consumed in tmpfs
+- PageTables: Amount dedicated to lowest level of page tables.
+
+#+begin_example
+[archgaelix@blu lab8]$ cat /proc/meminfo
+MemTotal:        8016900 kB
+MemFree:          417712 kB
+MemAvailable:    3315352 kB
+Buffers:          346728 kB
+Cached:          3091364 kB
+SwapCached:          208 kB
+Active:          1987944 kB
+Inactive:        4803028 kB
+Active(anon):     101988 kB
+Inactive(anon):  3769052 kB
+Active(file):    1885956 kB
+Inactive(file):  1033976 kB
+Unevictable:      216772 kB
+Mlocked:            5540 kB
+SwapTotal:       8016892 kB
+SwapFree:        7984372 kB
+Dirty:               200 kB
+Writeback:             0 kB
+AnonPages:       3569672 kB
+Mapped:           826724 kB
+Shmem:            527560 kB
+KReclaimable:     280892 kB
+Slab:             411548 kB
+SReclaimable:     280892 kB
+SUnreclaim:       130656 kB
+KernelStack:       15280 kB
+PageTables:        53824 kB
+NFS_Unstable:          0 kB
+Bounce:                0 kB
+WritebackTmp:          0 kB
+CommitLimit:    12025340 kB
+Committed_AS:   12959968 kB
+VmallocTotal:   34359738367 kB
+VmallocUsed:       73684 kB
+VmallocChunk:          0 kB
+Percpu:             4912 kB
+HardwareCorrupted:     0 kB
+AnonHugePages:         0 kB
+ShmemHugePages:        0 kB
+ShmemPmdMapped:        0 kB
+FileHugePages:         0 kB
+FilePmdMapped:         0 kB
+CmaTotal:              0 kB
+CmaFree:               0 kB
+HugePages_Total:       0
+HugePages_Free:        0
+HugePages_Rsvd:        0
+HugePages_Surp:        0
+Hugepagesize:       2048 kB
+Hugetlb:               0 kB
+DirectMap4k:      408512 kB
+DirectMap2M:     7866368 kB
+DirectMap1G:     1048576 kB
+
+#+end_example
+** Explore all fields of =vmstat= command in Linux
+This command reports and displays the virtual memory statistics included information are about processes, memory, paging, block IO, traps, disks and CPU activity.
+*** VM Mode
+#+begin_example
+[archgaelix@blu lab8]$ vmstat
+procs -----------memory---------- ---swap-- -----io---- -system-- ------cpu-----
+ r  b   swpd   free   buff  cache   si   so    bi    bo   in   cs us sy id wa st
+ 0  0  32520 389268 347500 3380552    0    1    82   104  656  487 10  4 86  0  0
+
+#+end_example
+
+- procs
+  - r: runnable processes
+  - b: processes in uninterruptible sleep
+- memory
+  + swpd: amount of virtual memory used
+  + free: amount of idle memory
+  + buff: amount of memory used as buffer
+  + cache: amount of memory used as cache
+- swap:
+  - si: memory swapped in from disk
+  - so: memory swapped to disk
+- io:
+  - bi: blocks received from block devices.
+  - bo: blocks sent to block devices.
+- system:
+  - in: number of interrupts per second, including the clock
+  - cs: number of context switches per second
+- cpu:
+  - us: time spent running non-kernel code
+  - sy: time spent running kernel code
+  - id: time spent idle.
+  - wa: time spent waiting for IO
+  - st: time stolen from a virtual machine
+
+*** Disk Mode
+#+begin_example
+[archgaelix@blu lab8]$ vmstat -d
+disk- ------------reads------------ ------------writes----------- -----IO------
+       total merged sectors      ms  total merged sectors      ms    cur    sec
+sda   168641  57343 8496826   77924 150629 170386 11150472  644332      0    260
+zram0    724      0    5792       4   9979      0   79832      63      0      0
+
+#+end_example
+- reads:
+  + total: total reads completed successfully
+  + merged: grouped reads resulting in one IO
+  + sectors: sectors read successfully
+  + ms: milliseconds spent reading
+- writes:
+  + total: total writes completed successfully
+  + merged: grouped writes resulting in one IO
+  + sectors: sectors written successfully
+  + ms: milliseconds spent writing
+- io:
+  + curr: IO in progress
+  + s: seconds spent for IO
