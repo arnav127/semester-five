@@ -1,0 +1,271 @@
+#+TITLE: Operating System
+#+SUBTITLE: Lab 9
+#+AUTHOR: Seshal Jain
+#+OPTIONS: num:nil toc:nil ^:nil
+#+DATE: September 14, 2021
+#+LATEX_CLASS: assignment
+#+LATEX_HEADER: \definecolor{solarized-bg}{HTML}{fdf6e3}
+#+EXPORT_FILE_NAME: 191112436_9
+* Program to translate logical address to physical address
+Fix the page size (for example 27 bits), then create a sample page table and fill entries manually. Generate some random logical addresses and map them to physical addresses as per entries of the page table. Print the logical address with their mapped physical address both in integer and in binary form as output along with page table entries.
+
+#+begin_src c :tangle l9p1.c
+#include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+
+bool rbool() { return rand() < (RAND_MAX >> 1); }
+
+void pageTable(int l_bits, int p_bits, int pgBits, int n);
+
+int main() {
+  int l_bits,       // Logical address size
+      p_bits,       // Physical address size
+      pg_size_bits, // Page size bits --> frame_offset/page_offset
+      n;            // Number of random logical address
+  printf("Enter logical address size (bits): ");
+  scanf("%d", &l_bits);
+  printf("Enter physical address size (bits): ");
+  scanf("%d", &p_bits);
+  printf("Enter page size (bits): ");
+  scanf("%d", &pg_size_bits);
+  printf("Enter number of random logical addresses to generate: ");
+  scanf("%d", &n);
+
+  pageTable(l_bits, p_bits, pg_size_bits, n);
+  return 0;
+}
+
+void pageTable(int lBits, int pBits, int pgSizeBits, int n) {
+  int pgBits = lBits - pgSizeBits; // Page bits from logical address
+  int f_bits = pBits - pgSizeBits; // Frame bits from physical address
+  printf("\nLogical Address Size: 2^%dB\n", lBits);
+  printf("\n|<--- %d bits --->|<--- %d bits --->|\n", pgBits, pgSizeBits);
+  printf("   Page No         Page offset\n\n");
+  printf("\nPhysical Address Size: 2^%dB\n", pBits);
+  printf("\n|<--- %d bits --->|<--- %d bits --->|\n", f_bits, pgSizeBits);
+  printf("   Frame No        Frame offset\n\n");
+
+  // The sample page table
+  // The index of each entry will be its page number
+  // Each entry of f_bits size to map physical memory
+  bool page_table[1 << pgBits][f_bits];
+  srand(time(0));
+  for (int i = 0; i < (1 << pgBits); i++)
+    for (int j = 0; j < f_bits; j++)
+      page_table[i][j] = rbool();
+
+  printf("\n");
+  printf("+-----------------------+-----------------------+--------------------"
+         "-----+---------------------+-----------------------+\n");
+  printf("|   Logical Add (bits)\t|   Logical Add (int)\t| Page No. ---> Frame "
+         "No. |  Physical Add (int)\t|  Physical Add (bits)\t|\n");
+  printf("+-----------------------+-----------------------+--------------------"
+         "-----+---------------------+-----------------------+\n");
+  // Generating random logical address and mapping them:
+  while (n--) {
+    bool l_add[lBits], p_add[pBits];
+    unsigned int l_num = 0, p_num = 0, i = 0;
+    unsigned int pg_num = 0, f_num = 0;
+    for (int i = 0; i < lBits; i++) {
+      l_add[i] = rbool();
+      l_num = l_num * 2 + (l_add[i] ? 1 : 0);
+    }
+    // Getting the page number
+
+    pg_num = l_num >> pgSizeBits;
+
+    // Page entry --> frame number
+    for (int i = 0; i < f_bits; i++) {
+      p_add[i] = page_table[pg_num][i];
+      f_num = f_num * 2 + (p_add[i] ? 1 : 0);
+    }
+    p_num = f_num;
+
+    // Getting frame offset from page offset
+    for (int i = 0; i < pgSizeBits; i++) {
+      p_add[f_bits + i] = l_add[pgBits + i];
+      p_num = p_num * 2 + (p_add[f_bits + i] ? 1 : 0);
+    }
+
+    printf("|    ");
+    while (i < pgBits) {
+      printf(l_add[i] ? "1" : "0");
+      i++;
+    }
+    printf("-");
+    while (i < lBits) {
+      printf(l_add[i] ? "1" : "0");
+      i++;
+    }
+    printf("\t|\t%d\t\t|   %d\t   ---", l_num, pg_num);
+    printf(">   %d\t  |\t  %d\t\t|    ", f_num, p_num);
+    for (i = 0; i < f_bits; i++)
+      printf(p_add[i] ? "1" : "0");
+    printf("-");
+    while (i < pBits) {
+      printf(p_add[i] ? "1" : "0");
+      i++;
+    }
+    printf("\t|\n");
+  }
+  printf("+-----------------------+-----------------------+--------------------"
+         "-----+---------------------+-----------------------+\n");
+}
+#+end_src
+** Output
+[[./img/p1.png]]
+
+* Implementation of Paging Scheme
+Take number of processes with their size as input from user, also take size of RAM and page size as input. Now randomly start generation of logical addresses in random sequence from each process and allocate them free frames as per the free list of frames. Once all the frames are loaded with pages, stop the program and print the status of page tables of each process and also print frame numbers along with their process number and page number loaded in it. \\
+For this you need to create some structures and functions like page table, list of frames with their status, frame allocator, etc.
+
+#+begin_src c :tangle l9p2.c
+#include <math.h>
+#include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
+
+struct frame;
+
+struct process {
+  int _id;
+  int size, pages;
+  struct frame **page_table;
+} typedef process;
+
+struct frame {
+  int _id;
+  int page_of_process;
+  process *proc;
+} typedef frame;
+
+process **processes;
+frame **ram;
+size_t frames_paged, frames;
+
+void shuffle(void *array, size_t n, size_t size);
+bool frame_allocater(process *proc, int page);
+bool paging(int n, int pg_size);
+void print_processes(int n);
+void print_ram();
+
+int main(int argc, char **argv) {
+  int n, r, pg, f;
+  printf("\nEnter the RAM size (MB): ");
+  scanf("%d", &r);
+  printf("Enter the page size (MB): ");
+  scanf("%d", &pg);
+  printf("Enter the number of processes: ");
+  scanf("%d", &n);
+  printf("Enter the size of respective processes in MB:\n");
+  processes = (process **)malloc(n * sizeof(process *));
+  for (int i = 0; i < n; i++) {
+    processes[i] = (process *)malloc(sizeof(process));
+    printf("P-%d: ", i);
+    scanf("%d", &(processes[i]->size));
+    processes[i]->_id = i;
+    processes[i]->pages = ceil(processes[i]->size * 1.0 / pg);
+    processes[i]->page_table =
+        (frame **)malloc(processes[i]->pages * sizeof(frame *));
+
+    // let us initialize page_table with NULL
+    for (int j = 0; j < processes[i]->pages; j++)
+      processes[i]->page_table[j] = NULL;
+  }
+
+  // for RAM
+  frames = ceil(r * 1.0 / pg);
+  ram = (frame **)malloc(frames * sizeof(frame *));
+  shuffle(processes, n, sizeof(process *));
+  if (paging(n, pg))
+    printf("\nAll pages of every process has been loaded in frames.");
+  else
+    printf("\nAll pages could not be loaded. There are no free frames left.");
+  // print the status of each page table of each process
+  print_processes(n);
+  // print ram details
+  print_ram();
+  printf("\n");
+  return 0;
+}
+
+void shuffle(void *array, size_t n, size_t size) {
+  // copied from stackoverflow
+  srand(time(0));
+  char tmp[size];
+  char *arr = array;
+  size_t stride = size * sizeof(char);
+
+  for (size_t i = 0; i < n - 1; ++i) {
+    size_t rnd = (size_t)rand();
+    size_t j = i + rnd / (RAND_MAX / (n - i) + 1);
+
+    memcpy(tmp, arr + j * stride, size);
+    memcpy(arr + j * stride, arr + i * stride, size);
+    memcpy(arr + i * stride, tmp, size);
+  }
+}
+
+bool frame_allocater(process *proc, int page) {
+  if (frames_paged == frames)
+    return false;
+  frame *fra = (frame *)malloc(sizeof(frame));
+  ram[frames_paged] = fra;
+  fra->_id = frames_paged;
+  fra->page_of_process = page;
+  fra->proc = proc;
+  proc->page_table[page] = fra;
+  frames_paged++;
+}
+
+bool paging(int n, int pg_size) {
+  for (int i = 0; i < n; i++) {
+    process *proc = processes[i];
+    // generate random logical address
+    // based on size of current process
+    int j = 0, // keep track of total pages paged
+        l_add, // current random logical address
+        p;     // page number in the process
+    while (j < proc->pages) {
+      l_add = rand() % proc->size;
+      p = l_add / pg_size;
+      if (proc->page_table[p] == NULL)
+        if (frame_allocater(proc, p))
+          j++;
+        else
+          return false;
+    }
+  }
+  return true;
+}
+
+void print_processes(int n) {
+  printf("\nPrinting Process details:");
+  for (int i = 0; i < n; i++) {
+    process *proc = processes[i];
+    printf("\nP-%d:  Size: %d MB, Pages: %d", proc->_id, proc->size,
+           proc->pages);
+    for (int j = 0; j < proc->pages; j++) {
+      printf("\nPage %d --> ", j);
+      if (proc->page_table[j])
+        printf("Frame %d", proc->page_table[j]->_id);
+      else
+        printf("XX Unalloted XX");
+    }
+    printf("\n");
+  }
+}
+
+void print_ram() {
+  printf("\nPrinting all frame details:");
+  for (int i = 0; i < frames_paged; i++)
+    printf("\nFrame %d  -->  Process %d  -->  Page %d", ram[i]->_id,
+           ram[i]->proc->_id, ram[i]->page_of_process);
+}
+#+end_src
+** Output
+[[./img/p2.png]]
