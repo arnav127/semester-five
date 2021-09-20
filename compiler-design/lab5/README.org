@@ -82,16 +82,20 @@ int yywrap(){}
 #+end_src
 ** Output
 #+begin_example
-~/D/M/S/A/compiler-design/lab6 [main] λ export lexer=l6p1
-~/D/M/S/A/compiler-design/lab6 [main] λ make
-flex  -t l6p1.l > l6p1.c
-gcc    -c -o l6p1.o l6p1.c
-gcc   l6p1.o   -o l6p1
-rm l6p1.c l6p1.o
+~/D/M/S/A/compiler-design/lab5 [main] λ export lexer=l5p1
+~/D/M/S/A/compiler-design/lab5 [main] λ make
+flex  -t l5p1.l > l5p1.c
+gcc    -c -o l5p1.o l5p1.c
+gcc   l5p1.o   -o l5p1
+rm l5p1.c l5p1.o
 ~/D/M/S/A/compiler-design/lab5 [main] λ ./l5p1
 Enter Postal Code: 452003
 
 452003 is for Madhya Pradesh
+
+Enter Postal Code: 123456
+
+123456 is for Haryana
 
 Enter Postal Code: 895623
 
@@ -100,14 +104,6 @@ Invalid Postal Code: 895623
 Enter Postal Code: 90000
 
 Invalid Postal Code: 90000
-
-Enter Postal Code: 900000
-
-900000 is for Army Postal Service
-
-Enter Postal Code: 809999
-
-809999 is for Bihar, Jharkhand
 #+end_example
 * Program to check for valid mobile number from country code
 #+begin_src c :tangle l5p2.l
@@ -117,19 +113,13 @@ Enter Postal Code: 809999
 
 %%
 
-(\+91-?|0)?(9206|9132|7269|7270|7271|7272|7273|7274|7279|8383|8433|7210|8268|8599|8620|8621|8622)-?[0-9]{6} printf("\n%s is for Aircel", yytext);
+\+91\ ?[0-9]{10} printf("\n%s is for India", yytext);
+\+1\ ?[0-9]{10} printf("\n%s is for USA", yytext);
+\+971\ ?[0-9]{10} printf("\n%s is for UAE", yytext);
+\+44\ ?[0-9]{10} printf("\n%s is for UK", yytext);
+\+[0-9]{1,3}\ ?[0-9]{10} printf("\n%s is not recognized", yytext);
 
-(\+91-?|0)?(9109|9172|9108|8942|7899|9079|9100|9116|9521)-?[0-9]{6} printf("\n%s is for Airtel", yytext);
-
-(\+91-?|0)?(9516|9126|9146|9514|9134|9071|7265|9515|9133|7871|8546|8548|8549|8550|9061|9128)-?[0-9]{6} printf("\n%s is for Idea", yytext);
-
-(\+91-?|0)?(9124|9147|9151)-?[0-9]{6} printf("\n%s is for Tata Docomo", yytext);
-
-(\+91-?|0)?(7266|7267|7268|9104|9119|9170|9520)-?[0-9]{6} printf("\n%s is for Uninor", yytext);
-
-(\+91-?|0)?(8999|9144|9513|9072|7280|7281|7282|7283|9073|8117|8118|8270|8291)-?[0-9]{6} printf("\n%s is for Vodafone", yytext);
-
-^\s*$ return 0;
+^\ *$ return 0;
 
 [^ \t\n]+ printf("\nInvalid Mobile Number: %s", yytext);
 
@@ -140,30 +130,281 @@ Enter Postal Code: 809999
 int main() {
     printf("Enter Mobile Number: ");
     yylex();
-    printf("Thanks for using lex.\n");
 }
 
 int yywrap(){}
 #+end_src
 ** Output
 #+begin_example
-~/D/M/S/A/compiler-design/lab6 [main] λ export lexer=l6p1
-~/D/M/S/A/compiler-design/lab6 [main] λ make
-flex  -t l6p1.l > l6p1.c
-gcc    -c -o l6p1.o l6p1.c
-gcc   l6p1.o   -o l6p1
-rm l6p1.c l6p1.o
-~/D/M/S/A/compiler-design/lab6 [main] λ ./l6p1
-Enter numbers:
-7389061102
-Valid Mobile Number
+~/D/M/S/A/compiler-design/lab6 [main] λ export lexer=l6p2
+~/D/M/S/A/compiler-design/lab5 [main] λ make
+flex  -t l5p2.l > l5p2.c
+gcc    -c -o l5p2.o l5p2.c
+gcc   l5p2.o   -o l5p2
+rm l5p2.c l5p2.o
+~/D/M/S/A/compiler-design/lab5 [main] λ ./l5p2
+Enter Mobile Number: +917389061102
 
-9039123456
-Valid Mobile Number
++917389061102 is for India
 
-4526578903
-Invalid Match
+Enter Mobile Number: +91 7389061102
 
-8525790
-Invalid Match
++91 7389061102 is for India
+
+Enter Mobile Number: +1 4652473617
+
++1 4652473617 is for USA
+
+Enter Mobile Number: +751 5416741336
+
++751 5416741336 is not recognized
+
+Enter Mobile Number: 123456
+
+Invalid Mobile Number: 123456
+#+end_example
+
+* Program to check for valid email addresses
+#+begin_src c :tangle l5p3.l
+%{
+    #include<stdio.h>
+%}
+
+%%
+
+[a-zA-Z0-9._-]+@(((gmail|hotmail)\.com)|manit\.ac\.in) printf("\n%s is valid", yytext);
+
+[^ \t\n]+ printf("\n%s is invalid", yytext);
+
+\n printf("\n\nEnter email: ");
+
+%%
+
+int main() {
+    printf("Enter email: ");
+    yylex();
+}
+
+int yywrap(){}
+#+end_src
+** Output
+#+begin_example
+~/D/M/S/A/compiler-design/lab5 [main] λ export lexer=l5p3
+~/D/M/S/A/compiler-design/lab5 [main] λ make
+flex  -t l5p3.l > l5p3.c
+gcc    -c -o l5p3.o l5p3.c
+gcc   l5p3.o   -o l5p3
+rm l5p3.o l5p3.c
+~/D/M/S/A/compiler-design/lab5 [main] λ ./l5p3
+Enter email: seshaljain11@gmail.com
+
+seshaljain11@gmail.com is valid
+
+Enter email: 191112436@manit.ac.in
+
+191112436@manit.ac.in is valid
+
+Enter email: johndoe@gamil.co
+
+johndoe@gamil.co is invalid
+#+end_example
+* Program to count the number of words, characters, blank spaces and lines in the input file
+#+begin_src c :tangle l5p4.l
+%{
+    #include<stdio.h>
+    int chars = 0, words = 0, lines = 0, tabs = 0, spaces = 0;
+%}
+
+%%
+
+\n        { lines++; chars++; }
+
+[^ \t\n]+ { words++, chars += yyleng; }
+
+([ ])     { spaces++; chars++; }
+
+\t        { tabs++; chars+= yyleng; }
+
+%%
+
+int main() {
+extern FILE *yyin;
+    yyin = fopen("text.txt", "r");
+    yylex();
+    printf("Characters: %d\nWords: %d\nLines: %d\nSpaces: %d\nTabs: %d\n", chars, words, lines, spaces, tabs);
+    return 0;
+}
+
+int yywrap(){}
+#+end_src
+** Output
+#+begin_example
+~/D/M/S/A/compiler-design/lab5 [main] λ export lexer=l5p4
+~/D/M/S/A/compiler-design/lab5 [main] λ make
+flex  -t l5p4.l > l5p4.c
+gcc    -c -o l5p4.o l5p4.c
+gcc   l5p4.o   -o l5p4
+rm l5p4.c l5p4.o
+~/D/M/S/A/compiler-design/lab5 [main] λ head -4 text.txt
+Elit ut aliquam, purus sit amet luctus venenatis, lectus magna
+fringilla urna, porttitor rhoncus dolor purus non enim praesent
+
+elem	entum facilisis leo, vel fringilla est ullamcorper eget nulla
+~/D/M/S/A/compiler-design/lab5 [main] λ ./l5p4
+Characters: 2737
+Words: 406
+Lines: 45
+Spaces: 357
+Tabs: 10
+#+end_example
+* Program to count the frequency of the given word existing in the input file
+Sample text file
+#+begin_example
+Elit ut aliquam, purus sit amet luctus venenatis, lectus magna
+fringilla urna, porttitor rhoncus dolor purus non enim praesent
+
+elem	entum facilisis leo, vel fringilla est ullamcorper eget nulla
+facilisi etiam! Neque ornare aen	ean euismod elementum nisi, quis
+eleifend quam. Nascetur ridiculus mus mauris vitae ultricies leo
+integer malesuada	nunc vel risus commodo viverra maecenas accumsan,
+lacus vel facilisis volutpat, es	t velit egestas! Tincidunt dui ut
+
+ornare	 lectus sit amet est placerat in egestas erat imperdiet sed
+euismod nisi porta lorem mollis aliquam ut porttitor leo a diam
+sollicitudin! Laore	et non curabitur gravida arcu? Pellentesque
+habitant morbi tristique senectus et netus et malesuada fames ac
+
+turpis egestas maecenas pharetra?	 Dictum sit amet justo donec enim
+diam, vulputate ut pharetra sit amet, aliquam id diam maecenas
+ultr	icies mi eget mauris! Sed pulvinar proin gravida hendrerit
+lectus a molestie lorem! Purus, in mollis nunc sed id semper risus!
+Rhoncus, urna neque viverra justo, nec ultrices dui sapien eget mi.
+Egestas congue quisque egestas diam	 in arcu cursus? Maecenas
+volutpat blan	dit aliquam etiam erat velit, scelerisque in dictum
+non, consectetur a erat nam. Odio aenean sed adipiscing diam donec
+adipiscing tristique risus nec feugiat in fermentum posuere. Arcu
+dui vivamus arcu felis, bibendum ut tristique et, egestas quis
+ipsum suspendisse ultrices gravida dictum fusce ut. Lorem ipsum
+dolor sit amet, consectetur adipiscing elit ut aliquam, purus sit
+amet luctus venenatis, lectus magna! Dictum at tempor commodo,
+ullamcorper a lacus vestibulum sed arcu non odio euismod lacinia at
+quis risus sed vulputate odio ut? Risus nec feugiat in fermentum
+posuere urna? Odio pellentesque diam volutpat commodo sed egestas
+egestas fringilla phasellus faucibus scelerisque eleifend donec
+pretium vulputate sapien nec sagittis aliquam malesuada bibendum
+arcu vitae elementum curabitur. Urna nunc id cursus metus aliquam
+eleifend mi in nulla posuere sollicitudin aliquam ultrices sagittis
+orci, a scelerisque purus semper eget duis at tellus at urna
+condimentum! Diam donec adipiscing tristique risus nec feugiat in
+fermentum posuere urna nec tincidunt? Sagittis, nisl rhoncus mattis
+rhoncus! Et ultrices neque ornare aenean euismod elementum nisi,
+quis eleifend quam adipiscing vitae proin. Volutpat consequat,
+mauris nunc congue nisi, vitae suscipit tellus mauris. Nulla
+facilisi nullam vehicula ipsum a arcu. Sit amet nisl suscipit
+adipiscing bibendum est ultricies integer quis auctor elit sed
+vulputate mi sit amet mauris commodo quis imperdiet massa tincidunt
+nunc pulvinar sapien et ligula ullamcorper. Semper auctor neque,
+vitae tempus quam pellentesque nec nam aliquam sem et tortor?
+#+end_example
+#+begin_src c :tangle l5p5.l
+%{
+    #include<stdio.h>
+    #include<string.h>
+    char str[50];
+    int freq = 0;
+%}
+
+%%
+
+[^ \t\n]+ if(strcmp(yytext, str)==0) freq++;
+
+\n |
+. ;
+
+%%
+
+int main() {
+    printf("Enter word: ");
+    scanf("%s", str);
+    extern FILE *yyin;
+    yyin = fopen("text.txt", "r");
+    yylex();
+    printf("The frequency of '%s' in the file is %d\n", str, freq);
+}
+ 
+int yywrap() {return 1;}
+#+end_src
+** Output
+#+begin_example
+~/D/M/S/A/compiler-design/lab5 [main] λ export lexer=l5p5
+
+~/D/M/S/A/compiler-design/lab5 [main] λ make
+flex  -t l5p5.l > l5p5.c
+gcc    -c -o l5p5.o l5p5.c
+gcc   l5p5.o   -o l5p5
+rm l5p5.c l5p5.o
+
+~/D/M/S/A/compiler-design/lab5 [main] λ ./l5p5
+Enter word: est
+The frequency of 'est' in the file is 3
+#+end_example
+* Program to count the number of identifiers in a C source code file
+Sample code file
+#+begin_src c :tangle code.c
+#include <stdio.h>
+
+int main()
+{
+    int i = 0;
+
+    for (int i = 0; i < 10; i++) {
+        printf("%d", i);
+    }
+
+    return 0;
+}
+#+end_src
+
+#+begin_src c :tangle l5p6.l
+%{
+    #include<stdio.h>
+    #include<string.h>
+    int cnt = 0;
+%}
+
+%%
+
+(if|else|switch|case|default|for|do|while|char|double|float|int|long|short|signed|unsigned|break|continue|goto|return|auto|extern|register|static|const|volatile|enum|sizeof|struct|typedef|union|void) ;
+
+(#define|#include|#undef|#ifdef|#ifndef|#if|#else|#elif|#endif|#error|#pragma).* ;
+
+[a-zA-Z_][a-zA-Z0-9_]* printf("%s\t", yytext), cnt++;
+
+([ \n])+ |
+. ;
+
+%%
+
+int main() {
+    extern FILE *yyin;
+    yyin = fopen("code.c", "r");
+    yylex();
+    printf("\nThere are %d instances of identifiers.\n", cnt);
+}
+ 
+int yywrap(){}
+#+end_src
+** Output
+#+begin_example
+~/D/M/S/A/compiler-design/lab5 [main] λ export lexer=l5p6
+
+~/D/M/S/A/compiler-design/lab5 [main] λ make
+flex  -t l5p6.l > l5p6.c
+gcc    -c -o l5p6.o l5p6.c
+gcc   l5p6.o   -o l5p6
+rm l5p6.o l5p6.c
+
+~/D/M/S/A/compiler-design/lab5 [main] λ ./l5p6
+main	i	i	i	i	printf	d	i
+There are 8 instances of identifiers.
 #+end_example
