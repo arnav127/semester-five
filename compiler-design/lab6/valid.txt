@@ -1,0 +1,8 @@
+11-06-2001 is valid
+22-15-1986 is invalid
+15-05-2021 is valid
+05-08-2020 is valid
+31-06-2020 is invalid
+26-12-2026 is valid
+03-13-2020 is invalid
+29-02-2021 is invalid

@@ -1,0 +1,376 @@
+#+TITLE: Compiler Design
+#+SUBTITLE: Lab 6
+#+AUTHOR: Seshal Jain
+#+OPTIONS: num:nil toc:nil ^:nil
+#+DATE: September 13, 2021
+#+LATEX_CLASS: assignment
+#+LATEX_HEADER: \definecolor{solarized-bg}{HTML}{fdf6e3}
+#+EXPORT_FILE_NAME: 191112436
+
+* Environment Setup
+Makefile
+#+begin_src makefile :tangle Makefile
+CC = gcc
+LEX = flex
+
+all: $(lexer)
+
+$(l): $(lexer).c ; $(CC) -o $@ $<
+
+$(l).c: $(lexer).l ; $(LEX) -o $@ $<
+
+clean: ; rm -rf $(lexer).c $(lexer)
+#+end_src
+* Program to check if date is valid
+=dates.txt=
+#+begin_example
+11-06-2001
+22-15-1986
+15-05-2021
+05-08-2020
+31-06-2020
+26-12-2026
+03-13-2020
+29-02-2021
+#+end_example
+
+#+begin_src c :tangle l6p1.l
+%{
+    #include <stdio.h>
+%}
+%%
+29-02-([1-2][0-9]{3}) {
+    int year = (yytext[6]-'0')*1000 + (yytext[7]-'0')*100 + (yytext[8]-'0')*10 + (yytext[9]-'0');
+    if(!(year % 4) || (!(year % 100) && (year % 400)))
+        fprintf (yyout, "%s is valid", yytext);
+    else
+        fprintf (yyout, "%s is invalid", yytext);
+}
+
+([0-1][0-9]|2[0-8])-02-([1-2][0-9]{3}) fprintf (yyout, "%s is valid", yytext);
+
+([0-2][0-9]|[3][0-1])-(01|03|05|07|08|10|12)-[1-2][0-9]{3} fprintf (yyout, "%s is valid", yytext);
+
+([0-2][0-9]|30)-(04|06|09|11)-[1-2][0-9]{3} fprintf (yyout, "%s is valid", yytext);
+
+.* fprintf (yyout, "%s is invalid", yytext);
+%%
+
+int yywrap(){return 1;}
+int main() {
+    yyin = fopen("dates.txt","r");
+    yyout = fopen("valid.txt", "w");
+    yylex();
+    return 0;
+}
+#+end_src
+** Output
+#+begin_example
+11-06-2001 is valid
+22-15-1986 is invalid
+15-05-2021 is valid
+05-08-2020 is valid
+31-06-2020 is invalid
+26-12-2026 is valid
+03-13-2020 is invalid
+29-02-2021 is invalid
+#+end_example
+* Program to implement Caesar cipher
+#+begin_src c :tangle l6p2.l
+%{
+    #include <stdio.h>
+%}
+%%
+[a-z] {printf("%c", (char)'a'+((yytext[0]-'a')+3)%(26));}
+
+[A-Z] {printf("%c", 'A'+((yytext[0]-'A')+3)%(26));}
+%%
+
+int yywrap(){}
+int main() {
+    yylex();
+    return 0;
+}
+#+end_src
+** Output
+#+begin_example
+~/D/M/S/A/compiler-design/lab6 [main] λ export lexer=l6p2
+
+~/D/M/S/A/compiler-design/lab6 [main] λ make
+flex  -t l6p2.l > l6p2.c
+gcc    -c -o l6p2.o l6p2.c
+gcc   l6p2.o   -o l6p2
+rm l6p2.o l6p2.c
+
+~/D/M/S/A/compiler-design/lab6 [main] λ ./l6p2 
+Hello, my name is Seshal Jain.
+Khoor, pb qdph lv Vhvkdo Mdlq.
+#+end_example
+
+* Program to count vowels and consonants in given string
+#+begin_src c :tangle l6p3.l
+%{
+    #include <stdio.h>
+    int vowels = 0, consonants = 0;
+%}
+
+%%
+[aeiouAEIOU] {vowels++;}
+
+[a-zA-Z] {consonants++;}
+
+.
+
+\n return 0;
+%%
+
+int yywrap(){}
+int main() {
+    yylex();
+    printf("Vowels: %d\nConsonants: %d", vowels, consonants);
+    return 0;
+}
+#+end_src
+** Output
+#+begin_example
+~/D/M/S/A/compiler-design/lab6 [main] λ export lexer=l6p3 
+
+~/D/M/S/A/compiler-design/lab6 [main] λ make
+flex  -t l6p3.l > l6p3.c
+gcc    -c -o l6p3.o l6p3.c
+gcc   l6p3.o   -o l6p3
+rm l6p3.o l6p3.c
+
+~/D/M/S/A/compiler-design/lab6 [main] λ ./l6p3
+Hello world! My name is Seshal Jain.
+Vowels: 10
+Consonants: 18
+#+end_example
+* Program to copy file contents along with line number
+=input.txt=
+#+begin_example
+Elit ut aliquam, purus sit amet luctus venenatis, lectus magna
+fringilla urna, porttitor rhoncus dolor purus non enim praesent
+
+elem	entum facilisis leo, vel fringilla est ullamcorper eget nulla
+facilisi etiam! Neque ornare aen	ean euismod elementum nisi, quis
+eleifend quam. Nascetur ridiculus mus mauris vitae ultricies leo
+integer malesuada	nunc vel risus commodo viverra maecenas accumsan,
+lacus vel facilisis volutpat, es	t velit egestas! Tincidunt dui ut
+
+ornare	 lectus sit amet est placerat in egestas erat imperdiet sed
+euismod nisi porta lorem mollis aliquam ut porttitor leo a diam
+sollicitudin! Laore	et non curabitur gravida arcu? Pellentesque
+habitant morbi tristique senectus et netus et malesuada fames ac
+
+turpis egestas maecenas pharetra?	 Dictum sit amet justo donec enim
+diam, vulputate ut pharetra sit amet, aliquam id diam maecenas
+ultr	icies mi eget mauris! Sed pulvinar proin gravida hendrerit
+lectus a molestie lorem! Purus, in mollis nunc sed id semper risus!
+Rhoncus, urna neque viverra justo, nec ultrices dui sapien eget mi.
+Egestas congue quisque egestas diam	 in arcu cursus? Maecenas
+volutpat blan	dit aliquam etiam erat velit, scelerisque in dictum
+non, consectetur a erat nam. Odio aenean sed adipiscing diam donec
+adipiscing tristique risus nec feugiat in fermentum posuere.
+#+end_example
+
+#+begin_src c :tangle l6p4.l
+%{
+    #include <stdio.h>
+    #include <string.h>
+    int l = 1;
+%}
+
+%%
+^\n fprintf(yyout, "%d\n", l++);
+
+.* fprintf(yyout, "%d %s", l++, yytext);
+%%
+
+int yywrap(){}
+int main() {
+    yyin = fopen("input.txt", "r");
+    yyout = fopen("output.txt", "w");
+    yylex();
+    return 0;
+}
+#+end_src
+** Output
+=output.txt=
+#+begin_example
+1 Elit ut aliquam, purus sit amet luctus venenatis, lectus magna
+2 fringilla urna, porttitor rhoncus dolor purus non enim praesent
+3
+4 elem	entum facilisis leo, vel fringilla est ullamcorper eget nulla
+5 facilisi etiam! Neque ornare aen	ean euismod elementum nisi, quis
+6 eleifend quam. Nascetur ridiculus mus mauris vitae ultricies leo
+7 integer malesuada	nunc vel risus commodo viverra maecenas accumsan,
+8 lacus vel facilisis volutpat, es	t velit egestas! Tincidunt dui ut
+9
+10 ornare	 lectus sit amet est placerat in egestas erat imperdiet sed
+11 euismod nisi porta lorem mollis aliquam ut porttitor leo a diam
+12 sollicitudin! Laore	et non curabitur gravida arcu? Pellentesque
+13 habitant morbi tristique senectus et netus et malesuada fames ac
+14
+15 turpis egestas maecenas pharetra?	 Dictum sit amet justo donec enim
+16 diam, vulputate ut pharetra sit amet, aliquam id diam maecenas
+17 ultr	icies mi eget mauris! Sed pulvinar proin gravida hendrerit
+18 lectus a molestie lorem! Purus, in mollis nunc sed id semper risus!
+19 Rhoncus, urna neque viverra justo, nec ultrices dui sapien eget mi.
+20 Egestas congue quisque egestas diam	 in arcu cursus? Maecenas
+21 volutpat blan	dit aliquam etiam erat velit, scelerisque in dictum
+22 non, consectetur a erat nam. Odio aenean sed adipiscing diam donec
+23 adipiscing tristique risus nec feugiat in fermentum posuere.
+#+end_example
+* Program to remove comments from C code
+=sample_in.c=
+#+begin_src c :tangle sample_in.c
+#include <stdio.h>
+
+/*
+ * This is a comment line
+ * This is another comment line
+ */
+
+int main() {
+  printf("Hello, world!"); // This is a comment
+  return 0;
+}
+#+end_src
+
+#+begin_src c :tangle l6p5.l
+%{
+    #include <stdio.h>
+    #include <string.h>
+%}
+
+%%
+\/\/.* ;
+\/\*(.|\n)*\*\/ ;
+%%
+
+int yywrap(){}
+int main() {
+    yyin=fopen("sample_in.c","r");
+    yyout= fopen("sample_out.c", "w");
+    yylex();
+    return 0;
+}
+#+end_src
+** Output
+=sample_out.c=
+#+begin_src c
+#include <stdio.h>
+
+
+
+int main() {
+  printf("Hello, world!");
+  return 0;
+}
+#+end_src
+* Program to count number of tokens in C code
+#+begin_src c :tangle l6p6.l
+%{
+    #include <stdio.h>
+    int keywords=0, operators=0, comments=0, identifiers=0, constants=0;
+%}
+
+%%
+("auto"|"break"|"case"|"char"|"const"|"continue"|"default"|"do"|"double"|"else"|"enum"|"extern"|"float"|"for"|"goto"|"if"|"int"|"long"|"register"|"return"|"short"|"signed"|"sizeof"|"static"|"struct"|"switch"|"typedef"|"union"|"unsigned"|"void"|"volatile"|"while") {keywords++;}
+
+("+"|"-"|"*"|"/"|"%"|"<"|">"|"=="|"!="|">"|"<"|">="|"<="|"="|"+="|"-="|"*="|"/="|"&&"|"||"|"!"|"&"|"|"|"^"|"~"|"<<"|">>") {operators++;}
+
+(\/\/.*)|(\/\*(.|\n)*\*\/) {comments++;}
+
+[+-]?(0|[1-9][0-9]*) {constants++;}
+
+[+-]?[0-9]+[.][0-9]+([{eE][+-]?[0-9]+)? {constants++;}
+
+"'"."'" {constants++;}
+
+"\"".*"\"" {constants++;}
+
+[a-zA-Z_][a-zA-Z0-9_]* {identifiers++;}
+
+[(),.;#{} \n]* ;
+%%
+
+int yywrap(){}
+int main()
+{
+    yyin=fopen("sample_in.c","r");
+    yylex();
+    printf("Keywords: %d\n", keywords);
+    printf("Operators: %d\n", operators);
+    printf("Comments: %d\n", comments);
+    printf("Identifiers: %d\n", identifiers);
+    printf("Consonants: %d", constants);
+    return 0;
+}
+#+end_src
+** Output
+#+begin_example
+Keywords: 2
+Operators: 2
+Comments: 2
+Identifiers: 5
+Consonants: 2
+#+end_example
+* Program to remove left recursion
+#+begin_src c :tangle l6p7.c
+#include <stdio.h>
+#include <string.h>
+int main() {
+  char nt, b, a, prod[10][10];
+  int n, idx = 3;
+  printf("Nmber of productions: ");
+  scanf("%d", &n);
+  printf("Enter grammar (S->SA|B):\n");
+  for (int i = 0; i < n; i++) {
+    scanf("%s", prod[i]);
+  }
+
+  for (int i = 0; i < n; i++) {
+    nt = prod[i][0];
+    if (nt == prod[i][idx]) {
+      a = prod[i][idx + 1];
+      printf("\n%d) Grammar %s is left recursive\n", i + 1, prod[i]);
+      while (prod[i][idx] != 0 && prod[i][idx] != '|' && idx++)
+        ;
+      if (prod[i][idx] != 0) {
+        b = prod[i][idx + 1];
+        printf("Grammar without left recursion:\n");
+        printf("%c->%c%c\'", nt, b, nt);
+        printf("\n%c\'->%c%c\'|%c\n", nt, a, nt, nt);
+      } else
+        printf("Grammar can't be reduced\n");
+    } else
+      printf("\n%d) Grammar: %s is not left recursive.\n", i + 1, prod[i]);
+    idx = 3;
+  }
+}
+#+end_src
+** Output
+#+begin_example
+Nmber of productions: 3
+Enter grammar (S->SA|B):
+S->SA|B
+E->EA|g
+T->Td|h
+
+1) Grammar S->SA|B is left recursive
+Grammar without left recursion:
+S->BS'
+S'->AS'|S
+
+2) Grammar E->EA|g is left recursive
+Grammar without left recursion:
+E->gE'
+E'->AE'|E
+
+3) Grammar T->Td|h is left recursive
+Grammar without left recursion:
+T->hT'
+T'->dT'|T
+#+end_example
